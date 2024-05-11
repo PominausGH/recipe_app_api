@@ -4,7 +4,7 @@
 
 from unittest.mock import patch
 
-from pyscopg2 import OperationalError as Psycopg2Error
+from pyscopg2 import OperationalError as Psycopg2opError
 
 from django.core.management import call_command
 from django.db.utils import OperationalError
