@@ -49,3 +49,32 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f'{self.user.email} favorited {self.recipe.title}'
+
+
+class Comment(models.Model):
+    """Comment on a recipe (supports nested replies)."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    recipe = models.ForeignKey(
+        'recipe.Recipe',
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    text = models.TextField(max_length=2000)
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='replies',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.user.email} on {self.recipe.title}'
