@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite
+from interaction.models import Rating, Favorite, Comment
 
 
 class RatingModelTests(TestCase):
@@ -118,3 +118,70 @@ class FavoriteModelTests(TestCase):
         )
         expected = f'{self.user.email} favorited {self.recipe.title}'
         self.assertEqual(str(favorite), expected)
+
+
+class CommentModelTests(TestCase):
+    """Tests for Comment model."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+        )
+        self.recipe = Recipe.objects.create(
+            author=self.user,
+            title='Test Recipe',
+            instructions='Test instructions',
+            is_published=True,
+        )
+
+    def test_create_comment(self):
+        """Test creating a comment is successful."""
+        comment = Comment.objects.create(
+            user=self.user,
+            recipe=self.recipe,
+            text='This is a great recipe!',
+        )
+
+        self.assertEqual(comment.text, 'This is a great recipe!')
+        self.assertEqual(comment.user, self.user)
+        self.assertEqual(comment.recipe, self.recipe)
+        self.assertIsNone(comment.parent)
+
+    def test_nested_comment(self):
+        """Test creating a reply to a comment."""
+        parent_comment = Comment.objects.create(
+            user=self.user,
+            recipe=self.recipe,
+            text='Original comment',
+        )
+        reply = Comment.objects.create(
+            user=self.user,
+            recipe=self.recipe,
+            text='This is a reply',
+            parent=parent_comment,
+        )
+
+        self.assertEqual(reply.parent, parent_comment)
+        self.assertIn(reply, parent_comment.replies.all())
+
+    def test_comment_cascade_delete_with_recipe(self):
+        """Test comments deleted when recipe is deleted."""
+        Comment.objects.create(
+            user=self.user,
+            recipe=self.recipe,
+            text='Test comment',
+        )
+
+        self.recipe.delete()
+        self.assertEqual(Comment.objects.count(), 0)
+
+    def test_comment_str(self):
+        """Test comment string representation."""
+        comment = Comment.objects.create(
+            user=self.user,
+            recipe=self.recipe,
+            text='Test comment',
+        )
+        expected = f'{self.user.email} on {self.recipe.title}'
+        self.assertEqual(str(comment), expected)
