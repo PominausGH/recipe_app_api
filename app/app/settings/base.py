@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'core',
     'taxonomy',
     'recipe',
+    'interaction',
 ]
 
 MIDDLEWARE = [
