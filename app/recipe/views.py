@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
+from django.db.models import Avg
 
 from recipe.models import Recipe
 from recipe.filters import RecipeFilter
@@ -30,17 +31,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = RecipeFilter
     search_fields = ['title', 'description']
-    ordering_fields = ['created_at', 'prep_time', 'cook_time']
+    ordering_fields = ['created_at', 'prep_time', 'cook_time', 'avg_rating']
     ordering = ['-created_at']
 
     def get_queryset(self):
         """Return recipes based on user authentication."""
+        queryset = Recipe.objects.annotate(
+            avg_rating=Avg('ratings__score')
+        )
+
         if self.request.user.is_authenticated:
-            return Recipe.objects.filter(
+            return queryset.filter(
                 models.Q(author=self.request.user) |
                 models.Q(is_published=True)
             ).distinct()
-        return Recipe.objects.filter(is_published=True)
+        return queryset.filter(is_published=True)
 
     def get_serializer_class(self):
         """Return appropriate serializer class."""

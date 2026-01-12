@@ -14,13 +14,16 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeListSerializer(serializers.ModelSerializer):
     """Serializer for recipe list view."""
     author_name = serializers.CharField(source='author.name', read_only=True)
+    average_rating = serializers.FloatField(read_only=True)
+    rating_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Recipe
         fields = [
             'id', 'title', 'description', 'author', 'author_name',
             'prep_time', 'cook_time', 'total_time', 'servings',
-            'difficulty', 'image', 'created_at',
+            'difficulty', 'image', 'created_at', 'average_rating',
+            'rating_count',
         ]
         read_only_fields = ['id', 'author', 'created_at']
 
@@ -29,6 +32,8 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
     """Serializer for recipe detail view."""
     ingredients = IngredientSerializer(many=True, read_only=True)
     author_name = serializers.CharField(source='author.name', read_only=True)
+    average_rating = serializers.FloatField(read_only=True)
+    rating_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Recipe
@@ -37,6 +42,7 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
             'author_name', 'prep_time', 'cook_time', 'total_time',
             'servings', 'difficulty', 'image', 'is_published',
             'category', 'tags', 'ingredients', 'created_at', 'updated_at',
+            'average_rating', 'rating_count',
         ]
         read_only_fields = ['id', 'author', 'created_at', 'updated_at']
 

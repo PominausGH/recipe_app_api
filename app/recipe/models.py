@@ -67,6 +67,19 @@ class Recipe(models.Model):
         cook = self.cook_time or 0
         return prep + cook
 
+    @property
+    def average_rating(self):
+        """Calculate average rating for this recipe."""
+        ratings = self.ratings.all()
+        if ratings.exists():
+            return round(sum(r.score for r in ratings) / ratings.count(), 1)
+        return None
+
+    @property
+    def rating_count(self):
+        """Get the number of ratings for this recipe."""
+        return self.ratings.count()
+
 
 class Ingredient(models.Model):
     """Ingredient for a recipe."""
