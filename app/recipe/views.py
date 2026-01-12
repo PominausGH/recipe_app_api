@@ -46,6 +46,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if self.request.method == 'POST':
                 return CommentCreateSerializer
             return CommentSerializer
+        if self.action == 'upload_image':
+            from recipe.serializers_image import RecipeImageSerializer
+            return RecipeImageSerializer
         return RecipeDetailSerializer
 
     def perform_create(self, serializer):
@@ -112,3 +115,36 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, recipe=recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAuthenticated, IsOwnerOrReadOnly],
+        url_path='upload-image',
+    )
+    def upload_image(self, request, pk=None):
+        """Upload an image to a recipe."""
+        recipe = self.get_object()
+        serializer = self.get_serializer(recipe, data=request.data)
+
+        if serializer.is_valid():
+            # Process the image before saving
+            image = request.FILES.get('image')
+            if image:
+                from core.utils import validate_image, process_image
+
+                is_valid, error = validate_image(image)
+                if not is_valid:
+                    return Response(
+                        {'image': [error]},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                processed_image = process_image(image)
+                serializer.save(image=processed_image)
+            else:
+                serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
