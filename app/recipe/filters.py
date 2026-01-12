@@ -32,6 +32,6 @@ class RecipeFilter(filters.FilterSet):
             from django.db.models.functions import Coalesce
 
             return queryset.annotate(
-                total_time=Coalesce(F('prep_time'), Value(0)) + Coalesce(F('cook_time'), Value(0))
-            ).filter(total_time__lte=value)
+                _total_time_calc=Coalesce(F('prep_time'), Value(0)) + Coalesce(F('cook_time'), Value(0))
+            ).filter(_total_time_calc__lte=value)
         return queryset

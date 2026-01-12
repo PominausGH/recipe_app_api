@@ -37,6 +37,7 @@ class RecipeImageUploadTests(TestCase):
             author=self.user,
             title='Test Recipe',
             instructions='Test instructions',
+            is_published=True,
         )
 
     def tearDown(self):

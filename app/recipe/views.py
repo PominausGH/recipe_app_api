@@ -106,7 +106,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = FavoriteSerializer(favorite)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=['get', 'post'])
+    @action(detail=True, methods=['get', 'post'], permission_classes=[IsAuthenticatedOrReadOnly])
     def comments(self, request, pk=None):
         """List or create comments for a recipe."""
         recipe = self.get_object()
