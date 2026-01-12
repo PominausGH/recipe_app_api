@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     # Local apps
     'core',
     'taxonomy',
+    'recipe',
 ]
 
 MIDDLEWARE = [
