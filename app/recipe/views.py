@@ -2,9 +2,12 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
 
 from recipe.models import Recipe
+from recipe.filters import RecipeFilter
 from recipe.serializers import (
     RecipeListSerializer,
     RecipeDetailSerializer,
@@ -24,6 +27,11 @@ from interaction.serializers import (
 class RecipeViewSet(viewsets.ModelViewSet):
     """ViewSet for recipes."""
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = RecipeFilter
+    search_fields = ['title', 'description']
+    ordering_fields = ['created_at', 'prep_time', 'cook_time']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         """Return recipes based on user authentication."""
