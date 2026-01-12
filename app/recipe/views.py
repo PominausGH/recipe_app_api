@@ -15,6 +15,7 @@ from recipe.serializers import (
     RecipeCreateSerializer,
 )
 from recipe.permissions import IsOwnerOrReadOnly
+from core.throttling import RecipeCreateThrottle
 from interaction.models import Rating, Favorite, Comment
 from interaction.serializers import (
     RatingSerializer,
@@ -28,6 +29,7 @@ from interaction.serializers import (
 class RecipeViewSet(viewsets.ModelViewSet):
     """ViewSet for recipes."""
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    throttle_classes = [RecipeCreateThrottle]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = RecipeFilter
     search_fields = ['title', 'description']
