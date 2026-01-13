@@ -261,3 +261,29 @@ class NotificationPreference(models.Model):
 
     def __str__(self):
         return f'Notification preferences for {self.user.email}'
+
+
+class FeedPreference(models.Model):
+    """User feed preferences."""
+    FEED_ORDER_CHOICES = [
+        ('chronological', 'Chronological'),
+        ('algorithmic', 'Algorithmic'),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='feed_preferences',
+    )
+    show_recipes = models.BooleanField(default=True)
+    show_ratings = models.BooleanField(default=True)
+    show_comments = models.BooleanField(default=False)
+    show_favorites = models.BooleanField(default=False)
+    feed_order = models.CharField(
+        max_length=15,
+        choices=FEED_ORDER_CHOICES,
+        default='chronological',
+    )
+
+    def __str__(self):
+        return f'Feed preferences for {self.user.email}'

@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from recipe.models import Recipe
 from interaction.models import (
     Rating, Favorite, Comment, Follow, FollowRequest,
-    Block, Mute, Notification, NotificationPreference
+    Block, Mute, Notification, NotificationPreference, FeedPreference
 )
 
 
@@ -447,4 +447,34 @@ class NotificationPreferenceModelTests(TestCase):
         """Test notification preference string representation."""
         prefs = NotificationPreference.objects.create(user=self.user)
         expected = f'Notification preferences for {self.user.email}'
+        self.assertEqual(str(prefs), expected)
+
+
+class FeedPreferenceModelTests(TestCase):
+    """Tests for FeedPreference model."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+        )
+
+    def test_create_feed_preference(self):
+        """Test creating feed preferences."""
+        prefs = FeedPreference.objects.create(user=self.user)
+        self.assertTrue(prefs.show_recipes)
+        self.assertTrue(prefs.show_ratings)
+        self.assertFalse(prefs.show_comments)
+        self.assertEqual(prefs.feed_order, 'chronological')
+
+    def test_preference_one_to_one(self):
+        """Test only one preference per user."""
+        FeedPreference.objects.create(user=self.user)
+        with self.assertRaises(IntegrityError):
+            FeedPreference.objects.create(user=self.user)
+
+    def test_feed_preference_str(self):
+        """Test feed preference string representation."""
+        prefs = FeedPreference.objects.create(user=self.user)
+        expected = f'Feed preferences for {self.user.email}'
         self.assertEqual(str(prefs), expected)
