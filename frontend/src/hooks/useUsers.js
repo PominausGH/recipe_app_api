@@ -34,12 +34,17 @@ export function useFollowers(userId) {
     queryFn: ({ pageParam = 1 }) => usersApi.getFollowers(userId, pageParam),
     getNextPageParam: (lastPage) => {
       if (lastPage.next) {
-        const url = new URL(lastPage.next);
-        return url.searchParams.get('page');
+        try {
+          const url = new URL(lastPage.next);
+          return url.searchParams.get('page');
+        } catch {
+          return undefined;
+        }
       }
       return undefined;
     },
     enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -49,12 +54,17 @@ export function useFollowing(userId) {
     queryFn: ({ pageParam = 1 }) => usersApi.getFollowing(userId, pageParam),
     getNextPageParam: (lastPage) => {
       if (lastPage.next) {
-        const url = new URL(lastPage.next);
-        return url.searchParams.get('page');
+        try {
+          const url = new URL(lastPage.next);
+          return url.searchParams.get('page');
+        } catch {
+          return undefined;
+        }
       }
       return undefined;
     },
     enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
