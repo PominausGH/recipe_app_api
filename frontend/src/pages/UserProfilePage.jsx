@@ -15,7 +15,7 @@ export function UserProfilePage() {
   const { data: recipesData, isLoading: recipesLoading } = useUserRecipes(id);
   const [modalType, setModalType] = useState(null);
 
-  const isOwnProfile = currentUser?.id === parseInt(id);
+  const isOwnProfile = currentUser?.id === parseInt(id, 10);
 
   if (isLoading) {
     return (
@@ -53,7 +53,7 @@ export function UserProfilePage() {
             {user.profile_photo ? (
               <img
                 src={user.profile_photo}
-                alt={user.name}
+                alt={`${user.name}'s profile photo`}
                 className="w-24 h-24 rounded-full object-cover"
               />
             ) : (
@@ -68,7 +68,10 @@ export function UserProfilePage() {
             <div className="flex items-center gap-2 mb-1">
               <h1 className="text-2xl font-bold truncate">{user.name}</h1>
               {user.is_verified && (
-                <CheckBadgeIcon className="h-6 w-6 text-primary-500 flex-shrink-0" />
+                <>
+                  <CheckBadgeIcon className="h-6 w-6 text-primary-500 flex-shrink-0" aria-hidden="true" />
+                  <span className="sr-only">Verified account</span>
+                </>
               )}
             </div>
 
@@ -79,15 +82,19 @@ export function UserProfilePage() {
             {/* Stats */}
             <div className="flex items-center gap-4 text-sm">
               <button
+                type="button"
                 onClick={() => setModalType('followers')}
                 className="hover:underline"
+                aria-label={`${user.followers_count || 0} followers, click to view`}
               >
                 <span className="font-semibold">{user.followers_count || 0}</span>{' '}
                 <span className="text-gray-600">followers</span>
               </button>
               <button
+                type="button"
                 onClick={() => setModalType('following')}
                 className="hover:underline"
+                aria-label={`${user.following_count || 0} following, click to view`}
               >
                 <span className="font-semibold">{user.following_count || 0}</span>{' '}
                 <span className="text-gray-600">following</span>
@@ -148,7 +155,7 @@ export function UserProfilePage() {
 
       {/* Followers Modal */}
       <FollowersModal
-        userId={parseInt(id)}
+        userId={parseInt(id, 10)}
         type={modalType}
         isOpen={!!modalType}
         onClose={() => setModalType(null)}
