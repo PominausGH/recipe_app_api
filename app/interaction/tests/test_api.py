@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment
+from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest
 
 
 def rate_url(recipe_id):
@@ -187,3 +187,94 @@ class CommentAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         reply = Comment.objects.get(id=res.data['id'])
         self.assertEqual(reply.parent, parent)
+
+
+class FollowAPITests(TestCase):
+    """Tests for follow API endpoints."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user1 = get_user_model().objects.create_user(
+            email='user1@example.com',
+            password='testpass123',
+        )
+        self.user2 = get_user_model().objects.create_user(
+            email='user2@example.com',
+            password='testpass123',
+        )
+        self.private_user = get_user_model().objects.create_user(
+            email='private@example.com',
+            password='testpass123',
+            is_private=True,
+        )
+
+    def test_follow_user(self):
+        """Test following a public user."""
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-follow', kwargs={'pk': self.user2.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            Follow.objects.filter(
+                follower=self.user1,
+                following=self.user2
+            ).exists()
+        )
+
+    def test_follow_private_user_creates_request(self):
+        """Test following private user creates follow request."""
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-follow', kwargs={'pk': self.private_user.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_202_ACCEPTED)
+        self.assertTrue(
+            FollowRequest.objects.filter(
+                requester=self.user1,
+                target=self.private_user
+            ).exists()
+        )
+
+    def test_unfollow_user(self):
+        """Test unfollowing a user."""
+        Follow.objects.create(follower=self.user1, following=self.user2)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-follow', kwargs={'pk': self.user2.id})
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(
+            Follow.objects.filter(
+                follower=self.user1,
+                following=self.user2
+            ).exists()
+        )
+
+    def test_list_followers(self):
+        """Test listing user's followers."""
+        Follow.objects.create(follower=self.user2, following=self.user1)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-followers', kwargs={'pk': self.user1.id})
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_list_following(self):
+        """Test listing who user follows."""
+        Follow.objects.create(follower=self.user1, following=self.user2)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-following', kwargs={'pk': self.user1.id})
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_cannot_follow_self(self):
+        """Test user cannot follow themselves."""
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-follow', kwargs={'pk': self.user1.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
