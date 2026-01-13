@@ -145,5 +145,5 @@ class FeedItemSerializer(serializers.Serializer):
     type = serializers.CharField()
     actor = UserSummarySerializer()
     recipe = RecipeListSerializer()
-    score = serializers.IntegerField(required=False)
+    score = serializers.IntegerField(required=False, allow_null=True)
     created_at = serializers.DateTimeField()

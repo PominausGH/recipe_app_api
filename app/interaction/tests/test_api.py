@@ -616,9 +616,26 @@ class FeedAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_feed_with_order_param(self):
-        """Test feed with order parameter."""
+        """Test feed with order parameter returns items in chronological order."""
+        from recipe.models import Recipe
+        recipe1 = Recipe.objects.create(
+            author=self.followed_user,
+            title='First Recipe',
+            instructions='Test',
+            is_published=True,
+        )
+        recipe2 = Recipe.objects.create(
+            author=self.followed_user,
+            title='Second Recipe',
+            instructions='Test',
+            is_published=True,
+        )
         self.client.force_authenticate(user=self.user)
         url = reverse('interaction:feed-list') + '?order=chronological'
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 2)
+        # Second recipe should be first (reverse chronological)
+        self.assertEqual(res.data['results'][0]['recipe']['title'], 'Second Recipe')
+        self.assertEqual(res.data['results'][1]['recipe']['title'], 'First Recipe')
