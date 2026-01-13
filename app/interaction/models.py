@@ -232,3 +232,32 @@ class Notification(models.Model):
     def __str__(self):
         actor_str = self.actor.email if self.actor else 'System'
         return f'{actor_str} {self.verb} {self.recipient.email}'
+
+
+class NotificationPreference(models.Model):
+    """User notification preferences."""
+    EMAIL_DIGEST_CHOICES = [
+        ('none', 'None'),
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notification_preferences',
+    )
+    notify_new_follower = models.BooleanField(default=True)
+    notify_follow_request = models.BooleanField(default=True)
+    notify_recipe_comment = models.BooleanField(default=True)
+    notify_recipe_rating = models.BooleanField(default=True)
+    notify_comment_reply = models.BooleanField(default=True)
+    notify_following_new_recipe = models.BooleanField(default=True)
+    email_digest = models.CharField(
+        max_length=10,
+        choices=EMAIL_DIGEST_CHOICES,
+        default='none',
+    )
+
+    def __str__(self):
+        return f'Notification preferences for {self.user.email}'

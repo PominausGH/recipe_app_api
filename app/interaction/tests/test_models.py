@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from recipe.models import Recipe
 from interaction.models import (
     Rating, Favorite, Comment, Follow, FollowRequest,
-    Block, Mute, Notification
+    Block, Mute, Notification, NotificationPreference
 )
 
 
@@ -419,3 +419,32 @@ class NotificationModelTests(TestCase):
         self.assertIsNone(notification.actor)
         expected = f'System badge_awarded {self.user1.email}'
         self.assertEqual(str(notification), expected)
+
+
+class NotificationPreferenceModelTests(TestCase):
+    """Tests for NotificationPreference model."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+        )
+
+    def test_create_notification_preference(self):
+        """Test creating notification preferences."""
+        prefs = NotificationPreference.objects.create(user=self.user)
+        self.assertTrue(prefs.notify_new_follower)
+        self.assertTrue(prefs.notify_recipe_comment)
+        self.assertEqual(prefs.email_digest, 'none')
+
+    def test_preference_one_to_one(self):
+        """Test only one preference per user."""
+        NotificationPreference.objects.create(user=self.user)
+        with self.assertRaises(IntegrityError):
+            NotificationPreference.objects.create(user=self.user)
+
+    def test_notification_preference_str(self):
+        """Test notification preference string representation."""
+        prefs = NotificationPreference.objects.create(user=self.user)
+        expected = f'Notification preferences for {self.user.email}'
+        self.assertEqual(str(prefs), expected)
