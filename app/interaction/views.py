@@ -13,7 +13,8 @@ from interaction.models import (
     Badge, UserBadge
 )
 from interaction.serializers import (
-    FollowSerializer, FollowRequestSerializer
+    FollowSerializer, FollowRequestSerializer,
+    BlockSerializer, MuteSerializer
 )
 
 
@@ -150,3 +151,80 @@ class UserViewSet(viewsets.GenericViewSet):
 
         serializer = FollowRequestSerializer(follow_request)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
+    def block(self, request, pk=None):
+        """Block or unblock a user."""
+        target_user = get_object_or_404(get_user_model(), pk=pk)
+
+        if target_user == request.user:
+            return Response(
+                {'error': 'You cannot block yourself.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if request.method == 'DELETE':
+            Block.objects.filter(
+                user=request.user,
+                blocked_user=target_user
+            ).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        # POST - block
+        with transaction.atomic():
+            block, created = Block.objects.get_or_create(
+                user=request.user,
+                blocked_user=target_user
+            )
+            # Remove follows in both directions
+            Follow.objects.filter(follower=request.user, following=target_user).delete()
+            Follow.objects.filter(follower=target_user, following=request.user).delete()
+            FollowRequest.objects.filter(requester=request.user, target=target_user).delete()
+            FollowRequest.objects.filter(requester=target_user, target=request.user).delete()
+
+        serializer = BlockSerializer(block)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
+    def mute(self, request, pk=None):
+        """Mute or unmute a user."""
+        target_user = get_object_or_404(get_user_model(), pk=pk)
+
+        if target_user == request.user:
+            return Response(
+                {'error': 'You cannot mute yourself.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if request.method == 'DELETE':
+            Mute.objects.filter(
+                user=request.user,
+                muted_user=target_user
+            ).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        mute, created = Mute.objects.get_or_create(
+            user=request.user,
+            muted_user=target_user
+        )
+
+        serializer = MuteSerializer(mute)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated],
+            url_path='me/blocked', url_name='blocked-list')
+    def blocked_list(self, request):
+        """List blocked users."""
+        blocks = Block.objects.filter(user=request.user).select_related('blocked_user')
+        page = self.paginate_queryset(blocks)
+        serializer = BlockSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated],
+            url_path='me/muted', url_name='muted-list')
+    def muted_list(self, request):
+        """List muted users."""
+        mutes = Mute.objects.filter(user=request.user).select_related('muted_user')
+        page = self.paginate_queryset(mutes)
+        serializer = MuteSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)

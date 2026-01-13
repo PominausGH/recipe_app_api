@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest
+from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest, Block, Mute
 
 
 def rate_url(recipe_id):
@@ -377,3 +377,112 @@ class FollowRequestAPITests(TestCase):
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class BlockMuteAPITests(TestCase):
+    """Tests for block and mute endpoints."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user1 = get_user_model().objects.create_user(
+            email='user1@example.com',
+            password='testpass123',
+        )
+        self.user2 = get_user_model().objects.create_user(
+            email='user2@example.com',
+            password='testpass123',
+        )
+
+    def test_block_user(self):
+        """Test blocking a user."""
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-block', kwargs={'pk': self.user2.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            Block.objects.filter(
+                user=self.user1,
+                blocked_user=self.user2
+            ).exists()
+        )
+
+    def test_block_removes_follow_both_directions(self):
+        """Test blocking removes follows in both directions."""
+        Follow.objects.create(follower=self.user1, following=self.user2)
+        Follow.objects.create(follower=self.user2, following=self.user1)
+
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-block', kwargs={'pk': self.user2.id})
+        self.client.post(url)
+
+        self.assertFalse(Follow.objects.filter(follower=self.user1, following=self.user2).exists())
+        self.assertFalse(Follow.objects.filter(follower=self.user2, following=self.user1).exists())
+
+    def test_unblock_user(self):
+        """Test unblocking a user."""
+        Block.objects.create(user=self.user1, blocked_user=self.user2)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-block', kwargs={'pk': self.user2.id})
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_mute_user(self):
+        """Test muting a user."""
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-mute', kwargs={'pk': self.user2.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            Mute.objects.filter(
+                user=self.user1,
+                muted_user=self.user2
+            ).exists()
+        )
+
+    def test_unmute_user(self):
+        """Test unmuting a user."""
+        Mute.objects.create(user=self.user1, muted_user=self.user2)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-mute', kwargs={'pk': self.user2.id})
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_list_blocked_users(self):
+        """Test listing blocked users."""
+        Block.objects.create(user=self.user1, blocked_user=self.user2)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-blocked-list')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_list_muted_users(self):
+        """Test listing muted users."""
+        Mute.objects.create(user=self.user1, muted_user=self.user2)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-muted-list')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_cannot_block_self(self):
+        """Test user cannot block themselves."""
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-block', kwargs={'pk': self.user1.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_mute_self(self):
+        """Test user cannot mute themselves."""
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-mute', kwargs={'pk': self.user1.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

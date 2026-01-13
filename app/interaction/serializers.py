@@ -107,3 +107,23 @@ class FollowRequestSerializer(serializers.ModelSerializer):
         model = FollowRequest
         fields = ['id', 'requester', 'target', 'status', 'created_at']
         read_only_fields = ['id', 'requester', 'target', 'created_at']
+
+
+class BlockSerializer(serializers.ModelSerializer):
+    """Serializer for blocks."""
+    blocked_user = UserSummarySerializer(read_only=True)
+
+    class Meta:
+        model = Block
+        fields = ['id', 'blocked_user', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class MuteSerializer(serializers.ModelSerializer):
+    """Serializer for mutes."""
+    muted_user = UserSummarySerializer(read_only=True)
+
+    class Meta:
+        model = Mute
+        fields = ['id', 'muted_user', 'created_at']
+        read_only_fields = ['id', 'created_at']
