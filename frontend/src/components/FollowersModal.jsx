@@ -11,13 +11,17 @@ export function FollowersModal({ userId, type, isOpen, onClose }) {
   const modalRef = useRef(null);
   const listRef = useRef(null);
 
+  // Call both hooks unconditionally to comply with Rules of Hooks
+  const followers = useFollowers(type === 'followers' ? userId : null);
+  const following = useFollowing(type === 'following' ? userId : null);
+
   const {
     data,
     isLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = type === 'followers' ? useFollowers(userId) : useFollowing(userId);
+  } = type === 'followers' ? followers : following;
 
   // Close on escape key
   useEffect(() => {
@@ -58,16 +62,20 @@ export function FollowersModal({ userId, type, isOpen, onClose }) {
       ref={modalRef}
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
     >
       <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <h2 id="modal-title" className="text-lg font-semibold">{title}</h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full"
+            aria-label="Close modal"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
 
