@@ -194,3 +194,40 @@ class Mute(models.Model):
 
     def __str__(self):
         return f'{self.user.email} muted {self.muted_user.email}'
+
+
+class Notification(models.Model):
+    """User notification."""
+    VERB_CHOICES = [
+        ('followed', 'Followed'),
+        ('follow_request', 'Follow Request'),
+        ('rated', 'Rated'),
+        ('commented', 'Commented'),
+        ('favorited', 'Favorited'),
+        ('posted_recipe', 'Posted Recipe'),
+        ('badge_awarded', 'Badge Awarded'),
+    ]
+
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='actions',
+        null=True,
+        blank=True,
+    )
+    verb = models.CharField(max_length=20, choices=VERB_CHOICES)
+    target_type = models.CharField(max_length=50, blank=True)
+    target_id = models.PositiveIntegerField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.actor.email} {self.verb} {self.recipient.email}'

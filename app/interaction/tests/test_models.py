@@ -3,7 +3,10 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest, Block, Mute
+from interaction.models import (
+    Rating, Favorite, Comment, Follow, FollowRequest,
+    Block, Mute, Notification
+)
 
 
 class RatingModelTests(TestCase):
@@ -352,3 +355,57 @@ class MuteModelTests(TestCase):
         )
         expected = f'{self.user1.email} muted {self.user2.email}'
         self.assertEqual(str(mute), expected)
+
+
+class NotificationModelTests(TestCase):
+    """Tests for Notification model."""
+
+    def setUp(self):
+        self.user1 = get_user_model().objects.create_user(
+            email='user1@example.com',
+            password='testpass123',
+        )
+        self.user2 = get_user_model().objects.create_user(
+            email='user2@example.com',
+            password='testpass123',
+        )
+
+    def test_create_notification(self):
+        """Test creating a notification."""
+        notification = Notification.objects.create(
+            recipient=self.user1,
+            actor=self.user2,
+            verb='followed',
+        )
+        self.assertEqual(notification.recipient, self.user1)
+        self.assertEqual(notification.actor, self.user2)
+        self.assertEqual(notification.verb, 'followed')
+        self.assertFalse(notification.is_read)
+
+    def test_notification_with_target(self):
+        """Test notification with target object."""
+        recipe = Recipe.objects.create(
+            author=self.user1,
+            title='Test Recipe',
+            instructions='Test',
+            is_published=True,
+        )
+        notification = Notification.objects.create(
+            recipient=self.user1,
+            actor=self.user2,
+            verb='rated',
+            target_type='recipe',
+            target_id=recipe.id,
+        )
+        self.assertEqual(notification.target_type, 'recipe')
+        self.assertEqual(notification.target_id, recipe.id)
+
+    def test_notification_str(self):
+        """Test notification string representation."""
+        notification = Notification.objects.create(
+            recipient=self.user1,
+            actor=self.user2,
+            verb='followed',
+        )
+        expected = f'{self.user2.email} followed {self.user1.email}'
+        self.assertEqual(str(notification), expected)
