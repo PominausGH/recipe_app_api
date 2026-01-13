@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 
 from interaction.models import (
@@ -15,7 +16,7 @@ from interaction.models import (
 from interaction.serializers import (
     FollowSerializer, FollowRequestSerializer,
     BlockSerializer, MuteSerializer, NotificationSerializer,
-    FeedItemSerializer
+    FeedItemSerializer, UserSummarySerializer
 )
 from interaction.services.feed import FeedService
 
@@ -230,6 +231,53 @@ class UserViewSet(viewsets.GenericViewSet):
         page = self.paginate_queryset(mutes)
         serializer = MuteSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def search(self, request):
+        """Search users by name or email."""
+        query = request.query_params.get('q', '')
+        if len(query) < 2:
+            return Response({'results': []})
+
+        users = get_user_model().objects.filter(
+            Q(name__icontains=query) | Q(email__icontains=query)
+        ).exclude(
+            pk=request.user.pk if request.user.is_authenticated else None
+        )[:20]
+
+        serializer = UserSummarySerializer(users, many=True)
+        return Response({'results': serializer.data})
+
+    @action(detail=False, methods=['get'])
+    def popular(self, request):
+        """Get popular users by follower count."""
+        users = get_user_model().objects.annotate(
+            follower_count=Count('followers_set')
+        ).order_by('-follower_count')[:20]
+
+        page = self.paginate_queryset(users)
+        serializer = UserSummarySerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def suggested(self, request):
+        """Get suggested users based on who you follow."""
+        # Get users followed by people you follow
+        following_ids = Follow.objects.filter(
+            follower=request.user
+        ).values_list('following_id', flat=True)
+
+        suggested_ids = Follow.objects.filter(
+            follower_id__in=following_ids
+        ).exclude(
+            following=request.user
+        ).exclude(
+            following_id__in=following_ids
+        ).values_list('following_id', flat=True).distinct()[:20]
+
+        users = get_user_model().objects.filter(pk__in=suggested_ids)
+        serializer = UserSummarySerializer(users, many=True)
+        return Response({'results': serializer.data})
 
 
 class NotificationViewSet(viewsets.GenericViewSet):

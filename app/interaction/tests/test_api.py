@@ -639,3 +639,158 @@ class FeedAPITests(TestCase):
         # Second recipe should be first (reverse chronological)
         self.assertEqual(res.data['results'][0]['recipe']['title'], 'Second Recipe')
         self.assertEqual(res.data['results'][1]['recipe']['title'], 'First Recipe')
+
+
+class DiscoveryAPITests(TestCase):
+    """Tests for user discovery endpoints."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email='user@example.com',
+            password='testpass123',
+            name='Test User',
+        )
+        self.other_user = get_user_model().objects.create_user(
+            email='other@example.com',
+            password='testpass123',
+            name='Other User',
+        )
+
+    def test_search_users(self):
+        """Test searching users by name."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-search') + '?q=Other'
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_search_users_by_email(self):
+        """Test searching users by email."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-search') + '?q=other@'
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_search_excludes_self(self):
+        """Test search excludes the current user."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-search') + '?q=Test'
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 0)
+
+    def test_search_requires_min_query_length(self):
+        """Test search requires at least 2 characters."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-search') + '?q=O'
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 0)
+
+    def test_popular_users(self):
+        """Test getting popular users."""
+        # Create followers for other_user
+        for i in range(5):
+            follower = get_user_model().objects.create_user(
+                email=f'follower{i}@example.com',
+                password='testpass123',
+            )
+            Follow.objects.create(follower=follower, following=self.other_user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-popular')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertGreater(len(res.data['results']), 0)
+
+    def test_popular_users_ordered_by_follower_count(self):
+        """Test popular users are ordered by follower count."""
+        # Create followers for other_user (5 followers)
+        for i in range(5):
+            follower = get_user_model().objects.create_user(
+                email=f'follower{i}@example.com',
+                password='testpass123',
+            )
+            Follow.objects.create(follower=follower, following=self.other_user)
+
+        # Create a third user with more followers (7 followers)
+        most_popular = get_user_model().objects.create_user(
+            email='popular@example.com',
+            password='testpass123',
+            name='Popular User',
+        )
+        for i in range(7):
+            follower = get_user_model().objects.create_user(
+                email=f'pop_follower{i}@example.com',
+                password='testpass123',
+            )
+            Follow.objects.create(follower=follower, following=most_popular)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-popular')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        # Most popular user should be first
+        self.assertEqual(res.data['results'][0]['id'], most_popular.id)
+
+    def test_suggested_users(self):
+        """Test getting suggested users based on who you follow."""
+        # User follows other_user
+        Follow.objects.create(follower=self.user, following=self.other_user)
+
+        # other_user follows a third user
+        third_user = get_user_model().objects.create_user(
+            email='third@example.com',
+            password='testpass123',
+            name='Third User',
+        )
+        Follow.objects.create(follower=self.other_user, following=third_user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-suggested')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        # Third user should be suggested
+        user_ids = [u['id'] for u in res.data['results']]
+        self.assertIn(third_user.id, user_ids)
+
+    def test_suggested_excludes_already_following(self):
+        """Test suggested users excludes users already followed."""
+        # User follows other_user
+        Follow.objects.create(follower=self.user, following=self.other_user)
+
+        # other_user follows third_user
+        third_user = get_user_model().objects.create_user(
+            email='third@example.com',
+            password='testpass123',
+            name='Third User',
+        )
+        Follow.objects.create(follower=self.other_user, following=third_user)
+
+        # User also follows third_user directly
+        Follow.objects.create(follower=self.user, following=third_user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-suggested')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        # Third user should NOT be suggested since already following
+        user_ids = [u['id'] for u in res.data['results']]
+        self.assertNotIn(third_user.id, user_ids)
+
+    def test_suggested_requires_auth(self):
+        """Test suggested users requires authentication."""
+        url = reverse('interaction:user-suggested')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
