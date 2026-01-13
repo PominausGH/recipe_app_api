@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest, Block
+from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest, Block, Mute
 
 
 class RatingModelTests(TestCase):
@@ -314,3 +314,41 @@ class BlockModelTests(TestCase):
         )
         expected = f'{self.user1.email} blocked {self.user2.email}'
         self.assertEqual(str(block), expected)
+
+
+class MuteModelTests(TestCase):
+    """Tests for Mute model."""
+
+    def setUp(self):
+        self.user1 = get_user_model().objects.create_user(
+            email='user1@example.com',
+            password='testpass123',
+        )
+        self.user2 = get_user_model().objects.create_user(
+            email='user2@example.com',
+            password='testpass123',
+        )
+
+    def test_create_mute(self):
+        """Test creating a mute."""
+        mute = Mute.objects.create(
+            user=self.user1,
+            muted_user=self.user2,
+        )
+        self.assertEqual(mute.user, self.user1)
+        self.assertEqual(mute.muted_user, self.user2)
+
+    def test_mute_unique_constraint(self):
+        """Test user can only mute another user once."""
+        Mute.objects.create(user=self.user1, muted_user=self.user2)
+        with self.assertRaises(IntegrityError):
+            Mute.objects.create(user=self.user1, muted_user=self.user2)
+
+    def test_mute_str(self):
+        """Test mute string representation."""
+        mute = Mute.objects.create(
+            user=self.user1,
+            muted_user=self.user2,
+        )
+        expected = f'{self.user1.email} muted {self.user2.email}'
+        self.assertEqual(str(mute), expected)

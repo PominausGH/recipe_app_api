@@ -172,3 +172,25 @@ class Block(models.Model):
 
     def __str__(self):
         return f'{self.user.email} blocked {self.blocked_user.email}'
+
+
+class Mute(models.Model):
+    """User muting another user (hides from feed)."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='muting',
+    )
+    muted_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='muted_by',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'muted_user']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user.email} muted {self.muted_user.email}'
