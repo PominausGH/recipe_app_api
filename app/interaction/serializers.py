@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from interaction.models import Rating, Favorite, Comment
+from interaction.models import (
+    Rating, Favorite, Comment, Follow, FollowRequest,
+    Block, Mute, Notification, NotificationPreference,
+    FeedPreference, Badge, UserBadge
+)
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -72,3 +76,34 @@ class CommentCreateSerializer(serializers.ModelSerializer):
                     'Parent comment must belong to the same recipe.'
                 )
         return value
+
+
+class UserSummarySerializer(serializers.Serializer):
+    """Lightweight user serializer for social features."""
+    id = serializers.IntegerField(read_only=True)
+    email = serializers.EmailField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    profile_photo = serializers.ImageField(read_only=True)
+    is_verified = serializers.BooleanField(read_only=True)
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    """Serializer for follow relationships."""
+    follower = UserSummarySerializer(read_only=True)
+    following = UserSummarySerializer(read_only=True)
+
+    class Meta:
+        model = Follow
+        fields = ['id', 'follower', 'following', 'created_at']
+        read_only_fields = ['id', 'follower', 'following', 'created_at']
+
+
+class FollowRequestSerializer(serializers.ModelSerializer):
+    """Serializer for follow requests."""
+    requester = UserSummarySerializer(read_only=True)
+    target = UserSummarySerializer(read_only=True)
+
+    class Meta:
+        model = FollowRequest
+        fields = ['id', 'requester', 'target', 'status', 'created_at']
+        read_only_fields = ['id', 'requester', 'target', 'created_at']
