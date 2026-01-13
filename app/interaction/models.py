@@ -308,3 +308,32 @@ class Badge(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class UserBadge(models.Model):
+    """Badge awarded to a user."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='badges',
+    )
+    badge = models.ForeignKey(
+        Badge,
+        on_delete=models.CASCADE,
+        related_name='awarded_to',
+    )
+    awarded_at = models.DateTimeField(auto_now_add=True)
+    awarded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='badges_awarded',
+    )
+
+    class Meta:
+        unique_together = ['user', 'badge']
+        ordering = ['-awarded_at']
+
+    def __str__(self):
+        return f'{self.user.email} earned {self.badge.name}'

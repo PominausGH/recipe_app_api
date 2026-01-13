@@ -6,7 +6,7 @@ from recipe.models import Recipe
 from interaction.models import (
     Rating, Favorite, Comment, Follow, FollowRequest,
     Block, Mute, Notification, NotificationPreference, FeedPreference,
-    Badge
+    Badge, UserBadge
 )
 
 
@@ -537,3 +537,45 @@ class BadgeModelTests(TestCase):
                 icon='star',
                 badge_type='achievement',
             )
+
+
+class UserBadgeModelTests(TestCase):
+    """Tests for UserBadge model."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+        )
+        self.badge = Badge.objects.create(
+            name='Rising Chef',
+            slug='rising-chef',
+            description='Published 10 recipes',
+            icon='chef-hat',
+            badge_type='achievement',
+        )
+
+    def test_create_user_badge(self):
+        """Test awarding a badge to user."""
+        user_badge = UserBadge.objects.create(
+            user=self.user,
+            badge=self.badge,
+        )
+        self.assertEqual(user_badge.user, self.user)
+        self.assertEqual(user_badge.badge, self.badge)
+        self.assertIsNone(user_badge.awarded_by)
+
+    def test_user_badge_unique(self):
+        """Test user can only have badge once."""
+        UserBadge.objects.create(user=self.user, badge=self.badge)
+        with self.assertRaises(IntegrityError):
+            UserBadge.objects.create(user=self.user, badge=self.badge)
+
+    def test_user_badge_str(self):
+        """Test user badge string representation."""
+        user_badge = UserBadge.objects.create(
+            user=self.user,
+            badge=self.badge,
+        )
+        expected = f'{self.user.email} earned {self.badge.name}'
+        self.assertEqual(str(user_badge), expected)
