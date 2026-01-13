@@ -297,3 +297,83 @@ class FollowAPITests(TestCase):
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class FollowRequestAPITests(TestCase):
+    """Tests for follow request management."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email='user@example.com',
+            password='testpass123',
+            is_private=True,
+        )
+        self.requester = get_user_model().objects.create_user(
+            email='requester@example.com',
+            password='testpass123',
+        )
+
+    def test_list_follow_requests(self):
+        """Test listing pending follow requests."""
+        FollowRequest.objects.create(
+            requester=self.requester,
+            target=self.user,
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-follow-requests')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_accept_follow_request(self):
+        """Test accepting a follow request."""
+        request = FollowRequest.objects.create(
+            requester=self.requester,
+            target=self.user,
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-accept-request', kwargs={'pk': request.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            Follow.objects.filter(
+                follower=self.requester,
+                following=self.user
+            ).exists()
+        )
+        request.refresh_from_db()
+        self.assertEqual(request.status, 'approved')
+
+    def test_reject_follow_request(self):
+        """Test rejecting a follow request."""
+        request = FollowRequest.objects.create(
+            requester=self.requester,
+            target=self.user,
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-reject-request', kwargs={'pk': request.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        request.refresh_from_db()
+        self.assertEqual(request.status, 'rejected')
+
+    def test_cannot_accept_other_users_request(self):
+        """Test user cannot accept follow request sent to another user."""
+        other_user = get_user_model().objects.create_user(
+            email='other@example.com',
+            password='testpass123',
+            is_private=True,
+        )
+        request = FollowRequest.objects.create(
+            requester=self.requester,
+            target=other_user,
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-accept-request', kwargs={'pk': request.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)

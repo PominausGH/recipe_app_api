@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 from interaction.models import (
@@ -99,3 +100,53 @@ class UserViewSet(viewsets.GenericViewSet):
         page = self.paginate_queryset(follows)
         serializer = FollowSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated],
+            url_path='me/follow-requests', url_name='follow-requests')
+    def follow_requests(self, request):
+        """List pending follow requests for current user."""
+        requests = FollowRequest.objects.filter(
+            target=request.user,
+            status='pending'
+        ).select_related('requester')
+        page = self.paginate_queryset(requests)
+        serializer = FollowRequestSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated],
+            url_path='accept', url_name='accept-request')
+    def accept_request(self, request, pk=None):
+        """Accept a follow request."""
+        follow_request = get_object_or_404(
+            FollowRequest,
+            pk=pk,
+            target=request.user,
+            status='pending'
+        )
+
+        with transaction.atomic():
+            follow_request.status = 'approved'
+            follow_request.save()
+            Follow.objects.get_or_create(
+                follower=follow_request.requester,
+                following=request.user
+            )
+
+        serializer = FollowRequestSerializer(follow_request)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated],
+            url_path='reject', url_name='reject-request')
+    def reject_request(self, request, pk=None):
+        """Reject a follow request."""
+        follow_request = get_object_or_404(
+            FollowRequest,
+            pk=pk,
+            target=request.user,
+            status='pending'
+        )
+        follow_request.status = 'rejected'
+        follow_request.save()
+
+        serializer = FollowRequestSerializer(follow_request)
+        return Response(serializer.data)
