@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest
+from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest, Block
 
 
 class RatingModelTests(TestCase):
@@ -270,3 +270,47 @@ class FollowRequestModelTests(TestCase):
         )
         expected = f'{self.user1.email} requested to follow {self.user2.email}'
         self.assertEqual(str(request), expected)
+
+
+class BlockModelTests(TestCase):
+    """Tests for Block model."""
+
+    def setUp(self):
+        self.user1 = get_user_model().objects.create_user(
+            email='user1@example.com',
+            password='testpass123',
+        )
+        self.user2 = get_user_model().objects.create_user(
+            email='user2@example.com',
+            password='testpass123',
+        )
+
+    def test_create_block(self):
+        """Test creating a block."""
+        block = Block.objects.create(
+            user=self.user1,
+            blocked_user=self.user2,
+        )
+        self.assertEqual(block.user, self.user1)
+        self.assertEqual(block.blocked_user, self.user2)
+
+    def test_block_unique_constraint(self):
+        """Test user can only block another user once."""
+        Block.objects.create(user=self.user1, blocked_user=self.user2)
+        with self.assertRaises(ValidationError):
+            Block.objects.create(user=self.user1, blocked_user=self.user2)
+
+    def test_cannot_block_self(self):
+        """Test user cannot block themselves."""
+        with self.assertRaises(ValidationError):
+            block = Block(user=self.user1, blocked_user=self.user1)
+            block.full_clean()
+
+    def test_block_str(self):
+        """Test block string representation."""
+        block = Block.objects.create(
+            user=self.user1,
+            blocked_user=self.user2,
+        )
+        expected = f'{self.user1.email} blocked {self.user2.email}'
+        self.assertEqual(str(block), expected)

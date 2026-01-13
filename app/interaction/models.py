@@ -142,3 +142,33 @@ class FollowRequest(models.Model):
 
     def __str__(self):
         return f'{self.requester.email} requested to follow {self.target.email}'
+
+
+class Block(models.Model):
+    """User blocking another user."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='blocking',
+    )
+    blocked_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='blocked_by',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'blocked_user']
+        ordering = ['-created_at']
+
+    def clean(self):
+        if self.user == self.blocked_user:
+            raise ValidationError('Users cannot block themselves.')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.user.email} blocked {self.blocked_user.email}'
