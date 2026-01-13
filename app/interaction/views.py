@@ -232,17 +232,28 @@ class UserViewSet(viewsets.GenericViewSet):
         serializer = MuteSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def search(self, request):
         """Search users by name or email."""
         query = request.query_params.get('q', '')
         if len(query) < 2:
             return Response({'results': []})
 
+        # Get users who have blocked the requesting user or who they have blocked
+        blocked_user_ids = Block.objects.filter(
+            Q(user=request.user) | Q(blocked_user=request.user)
+        ).values_list('user_id', 'blocked_user_id')
+        excluded_ids = set()
+        for blocker_id, blocked_id in blocked_user_ids:
+            excluded_ids.add(blocker_id)
+            excluded_ids.add(blocked_id)
+        excluded_ids.discard(request.user.pk)  # Don't exclude self from excluded set
+        excluded_ids.add(request.user.pk)  # But do exclude self from results
+
         users = get_user_model().objects.filter(
             Q(name__icontains=query) | Q(email__icontains=query)
         ).exclude(
-            pk=request.user.pk if request.user.is_authenticated else None
+            pk__in=excluded_ids
         )[:20]
 
         serializer = UserSummarySerializer(users, many=True)
@@ -251,7 +262,21 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['get'])
     def popular(self, request):
         """Get popular users by follower count."""
-        users = get_user_model().objects.annotate(
+        queryset = get_user_model().objects.all()
+
+        # If authenticated, exclude blocked users (both directions)
+        if request.user.is_authenticated:
+            blocked_user_ids = Block.objects.filter(
+                Q(user=request.user) | Q(blocked_user=request.user)
+            ).values_list('user_id', 'blocked_user_id')
+            excluded_ids = set()
+            for blocker_id, blocked_id in blocked_user_ids:
+                excluded_ids.add(blocker_id)
+                excluded_ids.add(blocked_id)
+            excluded_ids.discard(request.user.pk)
+            queryset = queryset.exclude(pk__in=excluded_ids)
+
+        users = queryset.annotate(
             follower_count=Count('followers_set')
         ).order_by('-follower_count')[:20]
 
@@ -267,12 +292,24 @@ class UserViewSet(viewsets.GenericViewSet):
             follower=request.user
         ).values_list('following_id', flat=True)
 
+        # Get blocked user IDs (both directions)
+        blocked_user_ids = Block.objects.filter(
+            Q(user=request.user) | Q(blocked_user=request.user)
+        ).values_list('user_id', 'blocked_user_id')
+        excluded_ids = set()
+        for blocker_id, blocked_id in blocked_user_ids:
+            excluded_ids.add(blocker_id)
+            excluded_ids.add(blocked_id)
+        excluded_ids.discard(request.user.pk)
+
         suggested_ids = Follow.objects.filter(
             follower_id__in=following_ids
         ).exclude(
             following=request.user
         ).exclude(
             following_id__in=following_ids
+        ).exclude(
+            following_id__in=excluded_ids
         ).values_list('following_id', flat=True).distinct()[:20]
 
         users = get_user_model().objects.filter(pk__in=suggested_ids)

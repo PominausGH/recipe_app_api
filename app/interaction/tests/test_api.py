@@ -794,3 +794,158 @@ class DiscoveryAPITests(TestCase):
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_search_requires_auth(self):
+        """Test search requires authentication."""
+        url = reverse('interaction:user-search') + '?q=Other'
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_search_excludes_blocked_users(self):
+        """Test search excludes users who blocked the current user."""
+        # Create a user who blocks self.user
+        blocker = get_user_model().objects.create_user(
+            email='blocker@example.com',
+            password='testpass123',
+            name='Blocker User',
+        )
+        Block.objects.create(user=blocker, blocked_user=self.user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-search') + '?q=Blocker'
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        user_ids = [u['id'] for u in res.data['results']]
+        self.assertNotIn(blocker.id, user_ids)
+
+    def test_search_excludes_users_blocked_by_current_user(self):
+        """Test search excludes users the current user has blocked."""
+        # User blocks other_user
+        Block.objects.create(user=self.user, blocked_user=self.other_user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-search') + '?q=Other'
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        user_ids = [u['id'] for u in res.data['results']]
+        self.assertNotIn(self.other_user.id, user_ids)
+
+    def test_popular_excludes_blocked_users(self):
+        """Test popular excludes users who blocked the current user."""
+        # Create a popular user who blocks self.user
+        blocker = get_user_model().objects.create_user(
+            email='blocker@example.com',
+            password='testpass123',
+            name='Blocker User',
+        )
+        # Give them followers to make them popular
+        for i in range(5):
+            follower = get_user_model().objects.create_user(
+                email=f'follower{i}@example.com',
+                password='testpass123',
+            )
+            Follow.objects.create(follower=follower, following=blocker)
+
+        Block.objects.create(user=blocker, blocked_user=self.user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-popular')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        user_ids = [u['id'] for u in res.data['results']]
+        self.assertNotIn(blocker.id, user_ids)
+
+    def test_popular_excludes_users_blocked_by_current_user(self):
+        """Test popular excludes users the current user has blocked."""
+        # Give other_user followers to make them popular
+        for i in range(5):
+            follower = get_user_model().objects.create_user(
+                email=f'follower{i}@example.com',
+                password='testpass123',
+            )
+            Follow.objects.create(follower=follower, following=self.other_user)
+
+        Block.objects.create(user=self.user, blocked_user=self.other_user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-popular')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        user_ids = [u['id'] for u in res.data['results']]
+        self.assertNotIn(self.other_user.id, user_ids)
+
+    def test_popular_unauthenticated(self):
+        """Test popular endpoint works without authentication."""
+        # Create followers for other_user
+        for i in range(3):
+            follower = get_user_model().objects.create_user(
+                email=f'follower{i}@example.com',
+                password='testpass123',
+            )
+            Follow.objects.create(follower=follower, following=self.other_user)
+
+        url = reverse('interaction:user-popular')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertGreater(len(res.data['results']), 0)
+
+    def test_suggested_excludes_blocked_users(self):
+        """Test suggested excludes users who blocked the current user."""
+        # User follows other_user
+        Follow.objects.create(follower=self.user, following=self.other_user)
+
+        # other_user follows third_user, who blocks self.user
+        third_user = get_user_model().objects.create_user(
+            email='third@example.com',
+            password='testpass123',
+            name='Third User',
+        )
+        Follow.objects.create(follower=self.other_user, following=third_user)
+        Block.objects.create(user=third_user, blocked_user=self.user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-suggested')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        user_ids = [u['id'] for u in res.data['results']]
+        self.assertNotIn(third_user.id, user_ids)
+
+    def test_suggested_excludes_users_blocked_by_current_user(self):
+        """Test suggested excludes users the current user has blocked."""
+        # User follows other_user
+        Follow.objects.create(follower=self.user, following=self.other_user)
+
+        # other_user follows third_user
+        third_user = get_user_model().objects.create_user(
+            email='third@example.com',
+            password='testpass123',
+            name='Third User',
+        )
+        Follow.objects.create(follower=self.other_user, following=third_user)
+
+        # User blocks third_user
+        Block.objects.create(user=self.user, blocked_user=third_user)
+
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-suggested')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        user_ids = [u['id'] for u in res.data['results']]
+        self.assertNotIn(third_user.id, user_ids)
+
+    def test_suggested_empty_when_not_following_anyone(self):
+        """Test suggested returns empty when user follows no one."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:user-suggested')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 0)
