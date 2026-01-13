@@ -14,7 +14,7 @@ from interaction.models import (
 )
 from interaction.serializers import (
     FollowSerializer, FollowRequestSerializer,
-    BlockSerializer, MuteSerializer
+    BlockSerializer, MuteSerializer, NotificationSerializer
 )
 
 
@@ -228,3 +228,40 @@ class UserViewSet(viewsets.GenericViewSet):
         page = self.paginate_queryset(mutes)
         serializer = MuteSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+
+class NotificationViewSet(viewsets.GenericViewSet):
+    """ViewSet for notifications."""
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardPagination
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user)
+
+    def list(self, request):
+        """List notifications."""
+        queryset = self.get_queryset().select_related('actor')
+        page = self.paginate_queryset(queryset)
+        serializer = NotificationSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='read', url_name='mark-read')
+    def mark_read(self, request, pk=None):
+        """Mark notification as read."""
+        notification = get_object_or_404(self.get_queryset(), pk=pk)
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+        serializer = NotificationSerializer(notification)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], url_path='read', url_name='mark-all-read')
+    def mark_all_read(self, request):
+        """Mark all notifications as read."""
+        self.get_queryset().update(is_read=True)
+        return Response({'status': 'all notifications marked as read'})
+
+    @action(detail=False, methods=['get'], url_path='unread-count', url_name='unread-count')
+    def unread_count(self, request):
+        """Get unread notification count."""
+        count = self.get_queryset().filter(is_read=False).count()
+        return Response({'count': count})

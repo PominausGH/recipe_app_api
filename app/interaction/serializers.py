@@ -127,3 +127,13 @@ class MuteSerializer(serializers.ModelSerializer):
         model = Mute
         fields = ['id', 'muted_user', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """Serializer for notifications."""
+    actor = UserSummarySerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'actor', 'verb', 'target_type', 'target_id', 'is_read', 'created_at']
+        read_only_fields = ['id', 'actor', 'verb', 'target_type', 'target_id', 'created_at']

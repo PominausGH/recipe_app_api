@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest, Block, Mute
+from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest, Block, Mute, Notification
 
 
 def rate_url(recipe_id):
@@ -486,3 +486,93 @@ class BlockMuteAPITests(TestCase):
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class NotificationAPITests(TestCase):
+    """Tests for notification endpoints."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email='user@example.com',
+            password='testpass123',
+        )
+        self.actor = get_user_model().objects.create_user(
+            email='actor@example.com',
+            password='testpass123',
+        )
+
+    def test_list_notifications(self):
+        """Test listing notifications."""
+        Notification.objects.create(
+            recipient=self.user,
+            actor=self.actor,
+            verb='followed',
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:notification-list')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_mark_notification_read(self):
+        """Test marking notification as read."""
+        notification = Notification.objects.create(
+            recipient=self.user,
+            actor=self.actor,
+            verb='followed',
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:notification-mark-read', kwargs={'pk': notification.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        notification.refresh_from_db()
+        self.assertTrue(notification.is_read)
+
+    def test_mark_all_read(self):
+        """Test marking all notifications as read."""
+        Notification.objects.create(recipient=self.user, actor=self.actor, verb='followed')
+        Notification.objects.create(recipient=self.user, actor=self.actor, verb='rated')
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:notification-mark-all-read')
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(Notification.objects.filter(recipient=self.user, is_read=False).count(), 0)
+
+    def test_unread_count(self):
+        """Test getting unread notification count."""
+        Notification.objects.create(recipient=self.user, actor=self.actor, verb='followed')
+        Notification.objects.create(recipient=self.user, actor=self.actor, verb='rated')
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:notification-unread-count')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['count'], 2)
+
+    def test_list_notifications_requires_auth(self):
+        """Test authentication required to list notifications."""
+        url = reverse('interaction:notification-list')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_cannot_mark_other_users_notification_read(self):
+        """Test cannot mark another user's notification as read."""
+        other_user = get_user_model().objects.create_user(
+            email='other@example.com',
+            password='testpass123',
+        )
+        notification = Notification.objects.create(
+            recipient=other_user,
+            actor=self.actor,
+            verb='followed',
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:notification-mark-read', kwargs={'pk': notification.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)

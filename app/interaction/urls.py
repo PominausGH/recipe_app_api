@@ -4,6 +4,7 @@ from interaction import views
 
 router = DefaultRouter()
 router.register('users', views.UserViewSet, basename='user')
+router.register('notifications', views.NotificationViewSet, basename='notification')
 
 app_name = 'interaction'
 
