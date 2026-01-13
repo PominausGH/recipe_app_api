@@ -109,3 +109,36 @@ class Follow(models.Model):
 
     def __str__(self):
         return f'{self.follower.email} follows {self.following.email}'
+
+
+class FollowRequest(models.Model):
+    """Pending follow request for private accounts."""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    requester = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sent_follow_requests',
+    )
+    target = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='received_follow_requests',
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['requester', 'target']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.requester.email} requested to follow {self.target.email}'

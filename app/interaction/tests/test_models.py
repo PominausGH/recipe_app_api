@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment, Follow
+from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest
 
 
 class RatingModelTests(TestCase):
@@ -230,3 +230,43 @@ class FollowModelTests(TestCase):
         )
         expected = f'{self.user1.email} follows {self.user2.email}'
         self.assertEqual(str(follow), expected)
+
+
+class FollowRequestModelTests(TestCase):
+    """Tests for FollowRequest model."""
+
+    def setUp(self):
+        self.user1 = get_user_model().objects.create_user(
+            email='user1@example.com',
+            password='testpass123',
+        )
+        self.user2 = get_user_model().objects.create_user(
+            email='user2@example.com',
+            password='testpass123',
+            is_private=True,
+        )
+
+    def test_create_follow_request(self):
+        """Test creating a follow request."""
+        request = FollowRequest.objects.create(
+            requester=self.user1,
+            target=self.user2,
+        )
+        self.assertEqual(request.requester, self.user1)
+        self.assertEqual(request.target, self.user2)
+        self.assertEqual(request.status, 'pending')
+
+    def test_follow_request_unique_constraint(self):
+        """Test only one pending request per user pair."""
+        FollowRequest.objects.create(requester=self.user1, target=self.user2)
+        with self.assertRaises(IntegrityError):
+            FollowRequest.objects.create(requester=self.user1, target=self.user2)
+
+    def test_follow_request_str(self):
+        """Test follow request string representation."""
+        request = FollowRequest.objects.create(
+            requester=self.user1,
+            target=self.user2,
+        )
+        expected = f'{self.user1.email} requested to follow {self.user2.email}'
+        self.assertEqual(str(request), expected)
