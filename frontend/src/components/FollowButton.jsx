@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFollowUser } from '../hooks/useUsers';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from './ui';
@@ -6,12 +7,18 @@ import { Button } from './ui';
 export function FollowButton({ userId, isPrivate, initialState = 'not_following', onStateChange }) {
   const [followState, setFollowState] = useState(initialState);
   const [isHovering, setIsHovering] = useState(false);
+  const [error, setError] = useState(null);
   const { isAuthenticated } = useAuth();
   const followMutation = useFollowUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setFollowState(initialState);
+  }, [initialState]);
 
   const handleClick = async () => {
     if (!isAuthenticated) {
-      window.location.href = '/login';
+      navigate('/login');
       return;
     }
 
@@ -29,8 +36,10 @@ export function FollowButton({ userId, isPrivate, initialState = 'not_following'
 
       setFollowState(newState);
       onStateChange?.(newState);
-    } catch (error) {
-      console.error('Follow action failed:', error);
+    } catch (err) {
+      console.error('Follow action failed:', err);
+      setError('Failed. Try again.');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -66,7 +75,7 @@ export function FollowButton({ userId, isPrivate, initialState = 'not_following'
       variant={buttonProps.variant}
       size="sm"
     >
-      {followMutation.isPending ? 'Loading...' : buttonProps.children}
+      {error ? error : (followMutation.isPending ? 'Loading...' : buttonProps.children)}
     </Button>
   );
 }
