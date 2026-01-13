@@ -287,3 +287,24 @@ class FeedPreference(models.Model):
 
     def __str__(self):
         return f'Feed preferences for {self.user.email}'
+
+
+class Badge(models.Model):
+    """Badge definition."""
+    BADGE_TYPE_CHOICES = [
+        ('verified', 'Verified'),
+        ('achievement', 'Achievement'),
+    ]
+
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    description = models.CharField(max_length=255)
+    icon = models.CharField(max_length=50)
+    badge_type = models.CharField(max_length=15, choices=BADGE_TYPE_CHOICES)
+    criteria = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name

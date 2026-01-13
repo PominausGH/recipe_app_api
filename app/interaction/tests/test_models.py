@@ -5,7 +5,8 @@ from django.db import IntegrityError
 from recipe.models import Recipe
 from interaction.models import (
     Rating, Favorite, Comment, Follow, FollowRequest,
-    Block, Mute, Notification, NotificationPreference, FeedPreference
+    Block, Mute, Notification, NotificationPreference, FeedPreference,
+    Badge
 )
 
 
@@ -478,3 +479,61 @@ class FeedPreferenceModelTests(TestCase):
         prefs = FeedPreference.objects.create(user=self.user)
         expected = f'Feed preferences for {self.user.email}'
         self.assertEqual(str(prefs), expected)
+
+
+class BadgeModelTests(TestCase):
+    """Tests for Badge model."""
+
+    def test_create_badge(self):
+        """Test creating a badge."""
+        badge = Badge.objects.create(
+            name='Rising Chef',
+            slug='rising-chef',
+            description='Published 10 recipes',
+            icon='chef-hat',
+            badge_type='achievement',
+            criteria={'type': 'recipe_count', 'threshold': 10},
+        )
+        self.assertEqual(badge.name, 'Rising Chef')
+        self.assertEqual(badge.badge_type, 'achievement')
+
+    def test_create_verified_badge(self):
+        """Test creating a verified badge (no criteria)."""
+        badge = Badge.objects.create(
+            name='Verified',
+            slug='verified',
+            description='Verified account',
+            icon='checkmark',
+            badge_type='verified',
+        )
+        self.assertEqual(badge.badge_type, 'verified')
+        self.assertIsNone(badge.criteria)
+
+    def test_badge_str(self):
+        """Test badge string representation."""
+        badge = Badge.objects.create(
+            name='Rising Chef',
+            slug='rising-chef',
+            description='Published 10 recipes',
+            icon='chef-hat',
+            badge_type='achievement',
+        )
+        self.assertEqual(str(badge), 'Rising Chef')
+
+    def test_badge_slug_unique(self):
+        """Test badge slug must be unique."""
+        Badge.objects.create(
+            name='Rising Chef',
+            slug='rising-chef',
+            description='Published 10 recipes',
+            icon='chef-hat',
+            badge_type='achievement',
+        )
+        with self.assertRaises(IntegrityError):
+            Badge.objects.create(
+                name='Another Badge',
+                slug='rising-chef',
+                description='Different badge same slug',
+                icon='star',
+                badge_type='achievement',
+            )
