@@ -278,3 +278,22 @@ class FollowAPITests(TestCase):
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_blocked_user_cannot_follow(self):
+        """Test blocked user cannot follow blocker."""
+        from interaction.models import Block
+        Block.objects.create(user=self.user2, blocked_user=self.user1)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-follow', kwargs={'pk': self.user2.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cannot_follow_user_twice(self):
+        """Test cannot follow user already following."""
+        Follow.objects.create(follower=self.user1, following=self.user2)
+        self.client.force_authenticate(user=self.user1)
+        url = reverse('interaction:user-follow', kwargs={'pk': self.user2.id})
+        res = self.client.post(url)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)

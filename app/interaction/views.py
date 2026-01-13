@@ -12,7 +12,7 @@ from interaction.models import (
     Badge, UserBadge
 )
 from interaction.serializers import (
-    FollowSerializer, FollowRequestSerializer, UserSummarySerializer
+    FollowSerializer, FollowRequestSerializer
 )
 
 
