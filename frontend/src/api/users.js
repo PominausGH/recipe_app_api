@@ -7,7 +7,7 @@ export const usersApi = {
   },
 
   async getRecipes(userId, params = {}) {
-    const response = await client.get('/recipe/recipes/', {
+    const response = await client.get('/recipes/', {
       params: { ...params, author: userId },
     });
     return response.data;
