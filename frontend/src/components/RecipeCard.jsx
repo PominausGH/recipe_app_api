@@ -40,7 +40,7 @@ export function RecipeCard({ recipe }) {
         <Card.Body>
           <h3 className="font-semibold text-lg mb-2 line-clamp-2">{recipe.title}</h3>
           <div className="text-gray-600 text-sm mb-3">
-            by <UserLink user={recipe.author} showPhoto={false} />
+            by <UserLink user={recipe.author} showPhoto={false} disableLink />
           </div>
           <div className="flex items-center justify-between text-sm text-gray-500">
             <div className="flex items-center gap-1">

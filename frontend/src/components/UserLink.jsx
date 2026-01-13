@@ -14,17 +14,13 @@ const sizes = {
   },
 };
 
-export function UserLink({ user, showPhoto = true, size = 'sm' }) {
+export function UserLink({ user, showPhoto = true, size = 'sm', disableLink = false }) {
   if (!user) return null;
 
   const sizeClasses = sizes[size] || sizes.sm;
 
-  return (
-    <Link
-      to={`/users/${user.id}`}
-      className="inline-flex items-center gap-1.5 hover:underline"
-      onClick={(e) => e.stopPropagation()}
-    >
+  const content = (
+    <>
       {showPhoto && (
         user.profile_photo ? (
           <img
@@ -54,6 +50,24 @@ export function UserLink({ user, showPhoto = true, size = 'sm' }) {
           <span className="sr-only">(verified)</span>
         </>
       )}
+    </>
+  );
+
+  if (disableLink) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        {content}
+      </span>
+    );
+  }
+
+  return (
+    <Link
+      to={`/users/${user.id}`}
+      className="inline-flex items-center gap-1.5 hover:underline"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {content}
     </Link>
   );
 }
