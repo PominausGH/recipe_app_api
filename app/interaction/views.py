@@ -14,8 +14,10 @@ from interaction.models import (
 )
 from interaction.serializers import (
     FollowSerializer, FollowRequestSerializer,
-    BlockSerializer, MuteSerializer, NotificationSerializer
+    BlockSerializer, MuteSerializer, NotificationSerializer,
+    FeedItemSerializer
 )
+from interaction.services.feed import FeedService
 
 
 class StandardPagination(PageNumberPagination):
@@ -265,3 +267,19 @@ class NotificationViewSet(viewsets.GenericViewSet):
         """Get unread notification count."""
         count = self.get_queryset().filter(is_read=False).count()
         return Response({'count': count})
+
+
+class FeedViewSet(viewsets.GenericViewSet):
+    """ViewSet for activity feed."""
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardPagination
+
+    def list(self, request):
+        """Get activity feed."""
+        order = request.query_params.get('order', 'chronological')
+        feed_items = FeedService.get_feed(request.user, order=order)
+
+        # Manual pagination
+        page = self.paginate_queryset(feed_items)
+        serializer = FeedItemSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)

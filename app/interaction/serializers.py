@@ -4,6 +4,7 @@ from interaction.models import (
     Block, Mute, Notification, NotificationPreference,
     FeedPreference, Badge, UserBadge
 )
+from recipe.serializers import RecipeListSerializer
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -137,3 +138,12 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'actor', 'verb', 'target_type', 'target_id', 'is_read', 'created_at']
         read_only_fields = ['id', 'actor', 'verb', 'target_type', 'target_id', 'created_at']
+
+
+class FeedItemSerializer(serializers.Serializer):
+    """Serializer for feed items."""
+    type = serializers.CharField()
+    actor = UserSummarySerializer()
+    recipe = RecipeListSerializer()
+    score = serializers.IntegerField(required=False)
+    created_at = serializers.DateTimeField()

@@ -576,3 +576,49 @@ class NotificationAPITests(TestCase):
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class FeedAPITests(TestCase):
+    """Tests for feed API endpoint."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email='user@example.com',
+            password='testpass123',
+        )
+        self.followed_user = get_user_model().objects.create_user(
+            email='followed@example.com',
+            password='testpass123',
+        )
+        Follow.objects.create(follower=self.user, following=self.followed_user)
+
+    def test_get_feed(self):
+        """Test getting activity feed."""
+        Recipe.objects.create(
+            author=self.followed_user,
+            title='Test Recipe',
+            instructions='Test',
+            is_published=True,
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:feed-list')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_feed_requires_auth(self):
+        """Test feed requires authentication."""
+        url = reverse('interaction:feed-list')
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_feed_with_order_param(self):
+        """Test feed with order parameter."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse('interaction:feed-list') + '?order=chronological'
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
