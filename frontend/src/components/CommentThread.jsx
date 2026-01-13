@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useAddComment } from '../hooks/useRecipes';
 import { Button, Input } from './ui';
+import { UserLink } from './UserLink';
 
 function Comment({ comment, recipeId, onReply }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -24,12 +25,9 @@ function Comment({ comment, recipeId, onReply }) {
   return (
     <div className="border-l-2 border-gray-200 pl-4">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-medium">
-          {comment.user?.name?.[0]?.toUpperCase() || '?'}
-        </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{comment.user?.name || 'Anonymous'}</span>
+            <UserLink user={comment.user} size="sm" />
             <span className="text-gray-400 text-sm">
               {new Date(comment.created_at).toLocaleDateString()}
             </span>

@@ -12,6 +12,7 @@ import { EditRecipePage } from './pages/EditRecipePage';
 import { MyRecipesPage } from './pages/MyRecipesPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { UserProfilePage } from './pages/UserProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -42,6 +43,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/recipes" element={<RecipeListPage />} />
               <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+              <Route path="/users/:id" element={<UserProfilePage />} />
 
               {/* Protected routes */}
               <Route

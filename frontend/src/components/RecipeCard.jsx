@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ClockIcon, StarIcon } from '@heroicons/react/24/solid';
 import { Card } from './ui';
+import { UserLink } from './UserLink';
 
 const difficultyColors = {
   easy: 'bg-green-100 text-green-800',
@@ -38,9 +39,9 @@ export function RecipeCard({ recipe }) {
         </div>
         <Card.Body>
           <h3 className="font-semibold text-lg mb-2 line-clamp-2">{recipe.title}</h3>
-          <p className="text-gray-600 text-sm mb-3">
-            by {recipe.author?.name || 'Unknown'}
-          </p>
+          <div className="text-gray-600 text-sm mb-3">
+            by <UserLink user={recipe.author} showPhoto={false} />
+          </div>
           <div className="flex items-center justify-between text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <StarIcon className="h-4 w-4 text-yellow-400" />
