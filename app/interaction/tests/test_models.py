@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment
+from interaction.models import Rating, Favorite, Comment, Follow
 
 
 class RatingModelTests(TestCase):
@@ -185,3 +185,48 @@ class CommentModelTests(TestCase):
         )
         expected = f'{self.user.email} on {self.recipe.title}'
         self.assertEqual(str(comment), expected)
+
+
+class FollowModelTests(TestCase):
+    """Tests for Follow model."""
+
+    def setUp(self):
+        self.user1 = get_user_model().objects.create_user(
+            email='user1@example.com',
+            password='testpass123',
+        )
+        self.user2 = get_user_model().objects.create_user(
+            email='user2@example.com',
+            password='testpass123',
+        )
+
+    def test_create_follow(self):
+        """Test creating a follow relationship."""
+        follow = Follow.objects.create(
+            follower=self.user1,
+            following=self.user2,
+        )
+        self.assertEqual(follow.follower, self.user1)
+        self.assertEqual(follow.following, self.user2)
+        self.assertIsNotNone(follow.created_at)
+
+    def test_follow_unique_constraint(self):
+        """Test user can only follow another user once."""
+        Follow.objects.create(follower=self.user1, following=self.user2)
+        with self.assertRaises(ValidationError):
+            Follow.objects.create(follower=self.user1, following=self.user2)
+
+    def test_cannot_follow_self(self):
+        """Test user cannot follow themselves."""
+        with self.assertRaises(ValidationError):
+            follow = Follow(follower=self.user1, following=self.user1)
+            follow.full_clean()
+
+    def test_follow_str(self):
+        """Test follow string representation."""
+        follow = Follow.objects.create(
+            follower=self.user1,
+            following=self.user2,
+        )
+        expected = f'{self.user1.email} follows {self.user2.email}'
+        self.assertEqual(str(follow), expected)
