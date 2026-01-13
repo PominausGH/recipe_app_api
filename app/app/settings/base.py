@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
+    'drf_spectacular',
     # Local apps
     'core',
     'taxonomy',
@@ -99,6 +100,16 @@ REST_FRAMEWORK = {
         'user': '1000/hour',
         'recipe_create': '20/day',
     },
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Recipe App API',
+    'DESCRIPTION': 'API for managing recipes, users, ratings, comments, and social features',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': r'/api/',
 }
 
 SIMPLE_JWT = {
