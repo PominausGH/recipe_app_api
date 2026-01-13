@@ -409,3 +409,13 @@ class NotificationModelTests(TestCase):
         )
         expected = f'{self.user2.email} followed {self.user1.email}'
         self.assertEqual(str(notification), expected)
+
+    def test_notification_without_actor(self):
+        """Test notification created without actor (system notification)."""
+        notification = Notification.objects.create(
+            recipient=self.user1,
+            verb='badge_awarded',
+        )
+        self.assertIsNone(notification.actor)
+        expected = f'System badge_awarded {self.user1.email}'
+        self.assertEqual(str(notification), expected)

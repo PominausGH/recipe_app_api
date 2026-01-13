@@ -230,4 +230,5 @@ class Notification(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.actor.email} {self.verb} {self.recipient.email}'
+        actor_str = self.actor.email if self.actor else 'System'
+        return f'{actor_str} {self.verb} {self.recipient.email}'
