@@ -52,3 +52,23 @@ class UserModelTests(TestCase):
         )
 
         self.assertEqual(user.bio, 'Test bio')
+
+
+class UserPrivacyTests(TestCase):
+    """Tests for user privacy fields."""
+
+    def test_user_is_private_default_false(self):
+        """Test is_private defaults to False."""
+        user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+        )
+        self.assertFalse(user.is_private)
+
+    def test_user_is_verified_default_false(self):
+        """Test is_verified defaults to False."""
+        user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+        )
+        self.assertFalse(user.is_verified)
