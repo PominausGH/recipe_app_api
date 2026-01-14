@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "drf_spectacular",
+    "corsheaders",
     # Local apps
     "core",
     "taxonomy",
@@ -30,6 +31,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -130,3 +132,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# CORS settings (override in production)
+CORS_ALLOWED_ORIGINS: list[str] = []
+CORS_ALLOW_CREDENTIALS = True
