@@ -15,15 +15,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker compose build
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml build
 
       - name: Start database
-        run: docker compose up -d db
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d db
 
       - name: Wait for database
         run: |
           for i in {1..30}; do
-            if docker compose exec -T db pg_isready -U devuser -d devdb > /dev/null 2>&1; then
+            if docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T db pg_isready -U devuser -d devdb > /dev/null 2>&1; then
               echo "Database is ready!"
               exit 0
             fi
@@ -34,14 +34,14 @@ jobs:
           exit 1
 
       - name: Run tests
-        run: docker compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
 
       - name: Run linting
-        run: docker compose run --rm app sh -c "flake8"
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml run --rm app sh -c "flake8"
 
       - name: Stop services
         if: always()
-        run: docker compose down
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down
 
   frontend-unit-tests:
     name: Frontend Unit Tests

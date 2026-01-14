@@ -1,0 +1,6 @@
+
+# CI-specific override - don't mount app directory to preserve
+# media/static directories created in Dockerfile
+services:
+  app:
+    volumes: []
