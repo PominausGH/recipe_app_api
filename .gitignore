@@ -24,3 +24,9 @@ env/
 # frontend
 frontend/.env
 
+
+# Coverage reports
+.coverage
+
+# Node modules
+node_modules/
