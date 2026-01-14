@@ -69,4 +69,9 @@ export const recipesApi = {
     });
     return response.data;
   },
+
+  async importFromUrl(url) {
+    const response = await client.post("/recipes/import-url/", { url });
+    return response.data;
+  },
 };

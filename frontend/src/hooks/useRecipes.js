@@ -109,3 +109,14 @@ export function useUploadRecipeImage() {
     },
   });
 }
+
+export function useImportRecipe() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (url) => recipesApi.importFromUrl(url),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: recipeKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: recipeKeys.myRecipes() });
+    },
+  });
+}

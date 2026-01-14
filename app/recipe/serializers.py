@@ -61,6 +61,7 @@ class RecipeDetailSerializer(serializers.ModelSerializer):
             "servings",
             "difficulty",
             "image",
+            "source_url",
             "is_published",
             "category",
             "tags",

@@ -40,6 +40,7 @@ class Recipe(models.Model):
         default="medium",
     )
     image = models.ImageField(upload_to="recipes/", null=True, blank=True)
+    source_url = models.URLField(max_length=500, blank=True)
     is_published = models.BooleanField(default=False)
     category = models.ForeignKey(
         "taxonomy.Category",

@@ -10,6 +10,7 @@ import { RecipeListPage } from "./pages/RecipeListPage";
 import { RecipeDetailPage } from "./pages/RecipeDetailPage";
 import { CreateRecipePage } from "./pages/CreateRecipePage";
 import { EditRecipePage } from "./pages/EditRecipePage";
+import { ImportRecipePage } from "./pages/ImportRecipePage";
 import { MyRecipesPage } from "./pages/MyRecipesPage";
 import { FavoritesPage } from "./pages/FavoritesPage";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -53,6 +54,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <CreateRecipePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/recipes/import"
+                  element={
+                    <ProtectedRoute>
+                      <ImportRecipePage />
                     </ProtectedRoute>
                   }
                 />

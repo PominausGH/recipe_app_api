@@ -38,6 +38,12 @@ export function Navbar() {
                     Create Recipe
                   </Link>
                   <Link
+                    to="/recipes/import"
+                    className="text-gray-700 hover:text-primary-600 px-3 py-2"
+                  >
+                    Import Recipe
+                  </Link>
+                  <Link
                     to="/my-recipes"
                     className="text-gray-700 hover:text-primary-600 px-3 py-2"
                   >
@@ -107,6 +113,12 @@ export function Navbar() {
                   className="block px-3 py-2 text-gray-700"
                 >
                   Create Recipe
+                </Link>
+                <Link
+                  to="/recipes/import"
+                  className="block px-3 py-2 text-gray-700"
+                >
+                  Import Recipe
                 </Link>
                 <Link
                   to="/my-recipes"

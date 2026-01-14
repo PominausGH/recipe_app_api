@@ -1,3 +1,5 @@
+import re
+
 from core.throttling import RecipeCreateThrottle
 from django.db import models
 from django.db.models import Avg
@@ -18,6 +20,7 @@ from recipe.serializers import (
     RecipeDetailSerializer,
     RecipeListSerializer,
 )
+from recipe_scrapers import scrape_me
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -168,3 +171,78 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[IsAuthenticated],
+        url_path="import-url",
+    )
+    def import_url(self, request):
+        """Import a recipe from a URL."""
+        url = request.data.get("url")
+
+        if not url:
+            return Response(
+                {"url": ["This field is required."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Basic URL validation
+        if not url.startswith(("http://", "https://")):
+            return Response(
+                {"url": ["Enter a valid URL."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            scraper = scrape_me(url)
+
+            # Extract data from scraper
+            title = scraper.title() or "Imported Recipe"
+            description = scraper.description() or ""
+            instructions = scraper.instructions() or ""
+
+            # Parse times
+            prep_time = scraper.prep_time()
+            cook_time = scraper.cook_time()
+
+            # If only total_time is available, use it as cook_time
+            if not prep_time and not cook_time:
+                total = scraper.total_time()
+                if total:
+                    cook_time = total
+
+            # Parse servings from yields (e.g., "6 servings" -> 6)
+            servings = 1
+            yields = scraper.yields()
+            if yields:
+                match = re.search(r"(\d+)", str(yields))
+                if match:
+                    servings = int(match.group(1))
+
+            # Create recipe
+            recipe = Recipe.objects.create(
+                author=request.user,
+                title=title,
+                description=description,
+                instructions=instructions,
+                prep_time=prep_time,
+                cook_time=cook_time,
+                servings=servings,
+                source_url=url,
+                is_published=False,  # Draft by default
+            )
+
+            # Return the created recipe
+            serializer = RecipeDetailSerializer(recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            error_msg = str(e)
+            if "not implemented" in error_msg.lower():
+                error_msg = "This website is not supported for recipe import."
+            return Response(
+                {"error": error_msg},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
