@@ -21,3 +21,11 @@ repos:
         args: ['--config=app/.flake8']
         files: ^app/
         exclude: /migrations/
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        files: ^app/
+        exclude: /(migrations|tests)/
+        args: ['--config-file=mypy.ini']
