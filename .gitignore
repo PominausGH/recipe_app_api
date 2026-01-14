@@ -18,6 +18,9 @@ app/*/*/*/__pycache__
 venv/
 env/
 
+# environment files
+.env
+
 # frontend
 frontend/.env
 
