@@ -1,15 +1,15 @@
-from rest_framework import serializers
 from interaction.models import (
-    Rating,
-    Favorite,
+    Block,
     Comment,
+    Favorite,
     Follow,
     FollowRequest,
-    Block,
     Mute,
     Notification,
+    Rating,
 )
 from recipe.serializers import RecipeListSerializer
+from rest_framework import serializers
 
 
 class RatingSerializer(serializers.ModelSerializer):

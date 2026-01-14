@@ -1,12 +1,13 @@
-import tempfile
 import os
-from PIL import Image
+import tempfile
+
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
-from rest_framework import status
+from PIL import Image
 from recipe.models import Recipe
+from rest_framework import status
+from rest_framework.test import APIClient
 
 
 def image_upload_url(recipe_id):

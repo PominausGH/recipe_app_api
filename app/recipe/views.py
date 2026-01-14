@@ -1,32 +1,28 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
-from rest_framework.filters import SearchFilter, OrderingFilter
-from django_filters.rest_framework import DjangoFilterBackend
+from core.throttling import RecipeCreateThrottle
 from django.db import models
 from django.db.models import Avg
-
-from recipe.models import Recipe
-from recipe.filters import RecipeFilter
-from recipe.serializers import (
-    RecipeListSerializer,
-    RecipeDetailSerializer,
-    RecipeCreateSerializer,
-)
-from recipe.permissions import IsOwnerOrReadOnly
-from core.throttling import RecipeCreateThrottle
-from interaction.models import Rating, Favorite, Comment
+from django_filters.rest_framework import DjangoFilterBackend
+from interaction.models import Comment, Favorite, Rating
 from interaction.serializers import (
-    RatingSerializer,
-    RatingCreateSerializer,
-    FavoriteSerializer,
-    CommentSerializer,
     CommentCreateSerializer,
+    CommentSerializer,
+    FavoriteSerializer,
+    RatingCreateSerializer,
+    RatingSerializer,
 )
+from recipe.filters import RecipeFilter
+from recipe.models import Recipe
+from recipe.permissions import IsOwnerOrReadOnly
+from recipe.serializers import (
+    RecipeCreateSerializer,
+    RecipeDetailSerializer,
+    RecipeListSerializer,
+)
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -155,7 +151,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             # Process the image before saving
             image = request.FILES.get("image")
             if image:
-                from core.utils import validate_image, process_image
+                from core.utils import process_image, validate_image
 
                 is_valid, error = validate_image(image)
                 if not is_valid:

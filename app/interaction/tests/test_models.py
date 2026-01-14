@@ -1,22 +1,22 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from recipe.models import Recipe
+from django.test import TestCase
 from interaction.models import (
-    Rating,
-    Favorite,
+    Badge,
+    Block,
     Comment,
+    Favorite,
+    FeedPreference,
     Follow,
     FollowRequest,
-    Block,
     Mute,
     Notification,
     NotificationPreference,
-    FeedPreference,
-    Badge,
+    Rating,
     UserBadge,
 )
+from recipe.models import Recipe
 
 
 class RatingModelTests(TestCase):

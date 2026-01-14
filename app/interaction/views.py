@@ -1,33 +1,23 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
-from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Q, Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
-
-from interaction.models import (
-    Follow,
-    FollowRequest,
-    Block,
-    Mute,
-    Notification,
-)
+from interaction.models import Block, Follow, FollowRequest, Mute, Notification
 from interaction.serializers import (
-    FollowSerializer,
-    FollowRequestSerializer,
     BlockSerializer,
+    FeedItemSerializer,
+    FollowRequestSerializer,
+    FollowSerializer,
     MuteSerializer,
     NotificationSerializer,
-    FeedItemSerializer,
     UserSummarySerializer,
 )
 from interaction.services.feed import FeedService
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 
 
 class StandardPagination(PageNumberPagination):

@@ -1,4 +1,4 @@
-from interaction.models import Follow, Mute, FeedPreference, Rating, Favorite
+from interaction.models import Favorite, FeedPreference, Follow, Mute, Rating
 from recipe.models import Recipe
 
 

@@ -1,6 +1,6 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
-from recipe.models import Recipe, Ingredient
+from django.test import TestCase
+from recipe.models import Ingredient, Recipe
 from taxonomy.models import Category, Tag
 
 

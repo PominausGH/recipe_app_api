@@ -1,8 +1,9 @@
 import os
 import uuid
 from io import BytesIO
-from PIL import Image
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from PIL import Image
 
 
 def generate_file_path(instance, filename):

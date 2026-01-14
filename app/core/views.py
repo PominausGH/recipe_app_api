@@ -1,11 +1,10 @@
+from core.serializers import UserProfileSerializer, UserRegistrationSerializer
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from core.serializers import UserRegistrationSerializer, UserProfileSerializer
 
 
 class RegisterView(generics.CreateAPIView):

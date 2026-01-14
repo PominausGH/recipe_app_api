@@ -1,5 +1,6 @@
-from .base import *  # noqa: F401, F403
 import os  # noqa: E402
+
+from .base import *  # noqa: F401, F403
 
 DEBUG = True
 

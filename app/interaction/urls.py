@@ -1,6 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import include, path
 from interaction import views
+from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register("users", views.UserViewSet, basename="user")

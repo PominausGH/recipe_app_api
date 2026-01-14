@@ -1,8 +1,8 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
-from recipe.models import Recipe
-from interaction.models import Follow, Rating, Favorite, Mute, FeedPreference
+from django.test import TestCase
+from interaction.models import Favorite, FeedPreference, Follow, Mute, Rating
 from interaction.services.feed import FeedService
+from recipe.models import Recipe
 
 
 class FeedServiceTests(TestCase):
