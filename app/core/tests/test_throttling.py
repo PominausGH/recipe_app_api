@@ -1,11 +1,15 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.core.cache import cache
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
 RECIPES_URL = reverse("recipe:recipe-list")
+LOGIN_URL = reverse("auth:login")
+REGISTER_URL = reverse("auth:register")
+REFRESH_URL = reverse("auth:refresh")
 
 
 class ThrottlingConfigTests(TestCase):
@@ -68,3 +72,136 @@ class RecipeCreateThrottleTests(TestCase):
 
         res = self.client.post(RECIPES_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+
+class AuthThrottleConfigTests(TestCase):
+    """Tests for auth endpoint throttle configuration."""
+
+    def test_auth_throttle_rate_configured(self):
+        """Test that auth throttle rate is configured in settings."""
+        rates = settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]
+        self.assertIn("auth", rates)
+        # Auth rate should be defined (value varies by environment)
+        self.assertIsNotNone(rates["auth"])
+
+
+class LoginThrottleTests(TestCase):
+    """Tests for login endpoint throttling."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="throttle@example.com",
+            password="testpass123",
+        )
+
+    def test_login_view_has_auth_throttle(self):
+        """Test that login view uses auth throttle class."""
+        from core.views import CustomTokenObtainPairView
+
+        throttle_classes = CustomTokenObtainPairView.throttle_classes
+        throttle_names = [t.__name__ for t in throttle_classes]
+        self.assertIn("AuthRateThrottle", throttle_names)
+
+    @override_settings(
+        REST_FRAMEWORK={
+            **settings.REST_FRAMEWORK,
+            "DEFAULT_THROTTLE_RATES": {
+                **settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
+                "auth": "2/minute",
+            },
+        }
+    )
+    def test_login_throttle_limits_requests(self):
+        """Test that login endpoint is throttled after limit exceeded."""
+        from core.throttles import AuthRateThrottle
+
+        # Clear throttle cache to pick up new rate and clear history
+        AuthRateThrottle.THROTTLE_RATES = settings.REST_FRAMEWORK[
+            "DEFAULT_THROTTLE_RATES"
+        ]
+        cache.clear()
+
+        payload = {"email": "throttle@example.com", "password": "wrongpass"}
+
+        # First two requests should work (return 401 for wrong password)
+        for _ in range(2):
+            res = self.client.post(LOGIN_URL, payload)
+            self.assertIn(
+                res.status_code,
+                [status.HTTP_401_UNAUTHORIZED, status.HTTP_200_OK],
+            )
+
+        # Third request should be throttled
+        res = self.client.post(LOGIN_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+
+class RegisterThrottleTests(TestCase):
+    """Tests for registration endpoint throttling."""
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_register_view_has_auth_throttle(self):
+        """Test that register view uses auth throttle class."""
+        from core.views import RegisterView
+
+        throttle_classes = RegisterView.throttle_classes
+        throttle_names = [t.__name__ for t in throttle_classes]
+        self.assertIn("AuthRateThrottle", throttle_names)
+
+    @override_settings(
+        REST_FRAMEWORK={
+            **settings.REST_FRAMEWORK,
+            "DEFAULT_THROTTLE_RATES": {
+                **settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
+                "auth": "2/minute",
+            },
+        }
+    )
+    def test_register_throttle_limits_requests(self):
+        """Test that register endpoint is throttled after limit exceeded."""
+        from core.throttles import AuthRateThrottle
+
+        # Clear throttle cache to pick up new rate and clear history
+        AuthRateThrottle.THROTTLE_RATES = settings.REST_FRAMEWORK[
+            "DEFAULT_THROTTLE_RATES"
+        ]
+        cache.clear()
+
+        # Make requests with different emails to avoid uniqueness constraint
+        for i in range(2):
+            payload = {
+                "email": f"test{i}@example.com",
+                "password": "testpass123",
+                "password_confirm": "testpass123",
+                "name": f"Test User {i}",
+            }
+            res = self.client.post(REGISTER_URL, payload)
+            self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        # Third request should be throttled
+        payload = {
+            "email": "test3@example.com",
+            "password": "testpass123",
+            "password_confirm": "testpass123",
+            "name": "Test User 3",
+        }
+        res = self.client.post(REGISTER_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+
+class RefreshThrottleTests(TestCase):
+    """Tests for token refresh endpoint throttling."""
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_refresh_view_has_auth_throttle(self):
+        """Test that refresh view uses auth throttle class."""
+        from core.views import CustomTokenRefreshView
+
+        throttle_classes = CustomTokenRefreshView.throttle_classes
+        throttle_names = [t.__name__ for t in throttle_classes]
+        self.assertIn("AuthRateThrottle", throttle_names)

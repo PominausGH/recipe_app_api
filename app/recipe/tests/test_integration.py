@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from recipe.models import Recipe
@@ -11,6 +12,8 @@ class RecipeCRUDIntegrationTests(TestCase):
     """Integration tests for recipe CRUD operations."""
 
     def setUp(self):
+        # Clear throttle cache to avoid rate limiting from other tests
+        cache.clear()
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
             email="chef@example.com",

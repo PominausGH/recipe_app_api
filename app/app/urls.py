@@ -1,3 +1,4 @@
+from core.views import HealthCheckView
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import (
@@ -11,6 +12,7 @@ urlpatterns = [
     path("api/", include("recipe.urls")),
     path("api/", include("interaction.urls")),
     path("api/auth/", include("core.urls")),
+    path("api/health/", HealthCheckView.as_view(), name="health-check"),
     # API Documentation
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(

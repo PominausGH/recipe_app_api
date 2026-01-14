@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -14,6 +15,8 @@ class PublicAuthAPITests(TestCase):
     """Test unauthenticated auth API access."""
 
     def setUp(self):
+        # Clear throttle cache to avoid rate limiting from other tests
+        cache.clear()
         self.client = APIClient()
 
     def test_register_user(self):
