@@ -9,4 +9,10 @@ urlpatterns = [
     path("refresh/", views.CustomTokenRefreshView.as_view(), name="refresh"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
     path("me/", views.MeView.as_view(), name="me"),
+    path("verify-email/", views.VerifyEmailView.as_view(), name="verify-email"),
+    path(
+        "resend-verification/",
+        views.ResendVerificationView.as_view(),
+        name="resend-verification",
+    ),
 ]
