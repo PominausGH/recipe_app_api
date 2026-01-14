@@ -1,4 +1,4 @@
-from core.models import EmailVerificationToken
+from core.models import EmailVerificationToken, PasswordResetToken
 from core.serializers import UserProfileSerializer, UserRegistrationSerializer
 from core.throttles import AuthRateThrottle
 from django.conf import settings
@@ -209,4 +209,139 @@ The Recipe App Team
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
             fail_silently=True,
+        )
+
+
+class PasswordResetRequestView(APIView):
+    """View to request password reset."""
+
+    permission_classes = [AllowAny]
+    throttle_classes = [AuthRateThrottle]
+
+    def post(self, request):
+        """Request password reset email."""
+        from django.contrib.auth import get_user_model
+
+        email = request.data.get("email")
+
+        if not email:
+            return Response(
+                {"error": "Email is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Try to find user
+        User = get_user_model()
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Return success to prevent email enumeration
+            return Response(
+                {"message": "If an account exists, a reset link has been sent."},
+                status=status.HTTP_200_OK,
+            )
+
+        # Delete old tokens
+        PasswordResetToken.objects.filter(user=user).delete()
+
+        # Create new token
+        token = PasswordResetToken.objects.create(user=user)
+
+        # Send reset email
+        self._send_reset_email(user, token)
+
+        return Response(
+            {"message": "If an account exists, a reset link has been sent."},
+            status=status.HTTP_200_OK,
+        )
+
+    def _send_reset_email(self, user, token):
+        """Send password reset email to user."""
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:5173")
+        reset_url = f"{frontend_url}/reset-password?token={token.token}"
+
+        subject = "Reset your Recipe App password"
+        message = f"""Hi {user.name or "there"},
+
+You requested to reset your password. Click the link below to set a new password:
+
+{reset_url}
+
+This link will expire in 1 hour.
+
+If you didn't request this, you can safely ignore this email.
+
+Thanks,
+The Recipe App Team
+"""
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    """View to confirm password reset."""
+
+    permission_classes = [AllowAny]
+    throttle_classes = [AuthRateThrottle]
+
+    def post(self, request):
+        """Reset password with token."""
+        token_value = request.data.get("token")
+        password = request.data.get("password")
+        password_confirm = request.data.get("password_confirm")
+
+        if not token_value:
+            return Response(
+                {"error": "Token is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not password or not password_confirm:
+            return Response(
+                {"error": "Password and password confirmation are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if password != password_confirm:
+            return Response(
+                {"error": "Passwords do not match."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if len(password) < 8:
+            return Response(
+                {"error": "Password must be at least 8 characters."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            token = PasswordResetToken.objects.get(token=token_value)
+        except PasswordResetToken.DoesNotExist:
+            return Response(
+                {"error": "Invalid token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if token.is_expired:
+            return Response(
+                {"error": "Token has expired."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Reset the password
+        user = token.user
+        user.set_password(password)
+        user.save()
+
+        # Delete the token
+        token.delete()
+
+        return Response(
+            {"message": "Password reset successfully."},
+            status=status.HTTP_200_OK,
         )
