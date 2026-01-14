@@ -17,11 +17,31 @@ jobs:
       - name: Build Docker image
         run: docker compose build
 
+      - name: Start database
+        run: docker compose up -d db
+
+      - name: Wait for database
+        run: |
+          for i in {1..30}; do
+            if docker compose exec -T db pg_isready -U devuser -d devdb > /dev/null 2>&1; then
+              echo "Database is ready!"
+              exit 0
+            fi
+            echo "Waiting for database... ($i/30)"
+            sleep 1
+          done
+          echo "Database did not become ready in time"
+          exit 1
+
       - name: Run tests
         run: docker compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
 
       - name: Run linting
         run: docker compose run --rm app sh -c "flake8"
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
 
   frontend-unit-tests:
     name: Frontend Unit Tests
