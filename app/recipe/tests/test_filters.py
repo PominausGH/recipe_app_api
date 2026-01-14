@@ -22,7 +22,9 @@ class RecipeFilterTests(TestCase):
         )
 
         # Create categories
-        self.breakfast = Category.objects.create(name='Breakfast', slug='breakfast')
+        self.breakfast = Category.objects.create(
+            name='Breakfast', slug='breakfast'
+        )
         self.dinner = Category.objects.create(name='Dinner', slug='dinner')
 
         # Create tags
@@ -85,7 +87,8 @@ class RecipeFilterTests(TestCase):
 
     def test_filter_by_multiple_tags(self):
         """Test filtering by multiple tags."""
-        res = self.client.get(RECIPES_URL, {'tags': f'{self.vegan.id},{self.quick.id}'})
+        tag_ids = f'{self.vegan.id},{self.quick.id}'
+        res = self.client.get(RECIPES_URL, {'tags': tag_ids})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         # Should return recipes that have ANY of the tags

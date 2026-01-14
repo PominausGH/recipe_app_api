@@ -90,7 +90,9 @@ class RecipeImageUploadTests(TestCase):
     def test_upload_image_bad_request(self):
         """Test uploading invalid image fails."""
         url = image_upload_url(self.recipe.id)
-        res = self.client.post(url, {'image': 'notanimage'}, format='multipart')
+        res = self.client.post(
+            url, {'image': 'notanimage'}, format='multipart'
+        )
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 

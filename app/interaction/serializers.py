@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from interaction.models import (
     Rating, Favorite, Comment, Follow, FollowRequest,
-    Block, Mute, Notification, NotificationPreference,
-    FeedPreference, Badge, UserBadge
+    Block, Mute, Notification,
 )
 from recipe.serializers import RecipeListSerializer
 
@@ -136,8 +135,13 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ['id', 'actor', 'verb', 'target_type', 'target_id', 'is_read', 'created_at']
-        read_only_fields = ['id', 'actor', 'verb', 'target_type', 'target_id', 'created_at']
+        fields = [
+            'id', 'actor', 'verb', 'target_type',
+            'target_id', 'is_read', 'created_at',
+        ]
+        read_only_fields = [
+            'id', 'actor', 'verb', 'target_type', 'target_id', 'created_at',
+        ]
 
 
 class FeedItemSerializer(serializers.Serializer):

@@ -4,7 +4,10 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from rest_framework import status
 from recipe.models import Recipe
-from interaction.models import Rating, Favorite, Comment, Follow, FollowRequest, Block, Mute, Notification
+from interaction.models import (
+    Rating, Favorite, Comment, Follow, FollowRequest,
+    Block, Mute, Notification,
+)
 
 
 def rate_url(recipe_id):
@@ -225,7 +228,9 @@ class FollowAPITests(TestCase):
     def test_follow_private_user_creates_request(self):
         """Test following private user creates follow request."""
         self.client.force_authenticate(user=self.user1)
-        url = reverse('interaction:user-follow', kwargs={'pk': self.private_user.id})
+        url = reverse(
+            'interaction:user-follow', kwargs={'pk': self.private_user.id}
+        )
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_202_ACCEPTED)
@@ -255,7 +260,9 @@ class FollowAPITests(TestCase):
         """Test listing user's followers."""
         Follow.objects.create(follower=self.user2, following=self.user1)
         self.client.force_authenticate(user=self.user1)
-        url = reverse('interaction:user-followers', kwargs={'pk': self.user1.id})
+        url = reverse(
+            'interaction:user-followers', kwargs={'pk': self.user1.id}
+        )
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -265,7 +272,9 @@ class FollowAPITests(TestCase):
         """Test listing who user follows."""
         Follow.objects.create(follower=self.user1, following=self.user2)
         self.client.force_authenticate(user=self.user1)
-        url = reverse('interaction:user-following', kwargs={'pk': self.user1.id})
+        url = reverse(
+            'interaction:user-following', kwargs={'pk': self.user1.id}
+        )
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -334,7 +343,9 @@ class FollowRequestAPITests(TestCase):
             target=self.user,
         )
         self.client.force_authenticate(user=self.user)
-        url = reverse('interaction:user-accept-request', kwargs={'pk': request.id})
+        url = reverse(
+            'interaction:user-accept-request', kwargs={'pk': request.id}
+        )
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -354,7 +365,9 @@ class FollowRequestAPITests(TestCase):
             target=self.user,
         )
         self.client.force_authenticate(user=self.user)
-        url = reverse('interaction:user-reject-request', kwargs={'pk': request.id})
+        url = reverse(
+            'interaction:user-reject-request', kwargs={'pk': request.id}
+        )
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -373,7 +386,9 @@ class FollowRequestAPITests(TestCase):
             target=other_user,
         )
         self.client.force_authenticate(user=self.user)
-        url = reverse('interaction:user-accept-request', kwargs={'pk': request.id})
+        url = reverse(
+            'interaction:user-accept-request', kwargs={'pk': request.id}
+        )
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
@@ -416,8 +431,16 @@ class BlockMuteAPITests(TestCase):
         url = reverse('interaction:user-block', kwargs={'pk': self.user2.id})
         self.client.post(url)
 
-        self.assertFalse(Follow.objects.filter(follower=self.user1, following=self.user2).exists())
-        self.assertFalse(Follow.objects.filter(follower=self.user2, following=self.user1).exists())
+        self.assertFalse(
+            Follow.objects.filter(
+                follower=self.user1, following=self.user2
+            ).exists()
+        )
+        self.assertFalse(
+            Follow.objects.filter(
+                follower=self.user2, following=self.user1
+            ).exists()
+        )
 
     def test_unblock_user(self):
         """Test unblocking a user."""
@@ -524,7 +547,10 @@ class NotificationAPITests(TestCase):
             verb='followed',
         )
         self.client.force_authenticate(user=self.user)
-        url = reverse('interaction:notification-mark-read', kwargs={'pk': notification.id})
+        url = reverse(
+            'interaction:notification-mark-read',
+            kwargs={'pk': notification.id},
+        )
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -533,19 +559,30 @@ class NotificationAPITests(TestCase):
 
     def test_mark_all_read(self):
         """Test marking all notifications as read."""
-        Notification.objects.create(recipient=self.user, actor=self.actor, verb='followed')
-        Notification.objects.create(recipient=self.user, actor=self.actor, verb='rated')
+        Notification.objects.create(
+            recipient=self.user, actor=self.actor, verb='followed'
+        )
+        Notification.objects.create(
+            recipient=self.user, actor=self.actor, verb='rated'
+        )
         self.client.force_authenticate(user=self.user)
         url = reverse('interaction:notification-mark-all-read')
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(Notification.objects.filter(recipient=self.user, is_read=False).count(), 0)
+        unread = Notification.objects.filter(
+            recipient=self.user, is_read=False
+        ).count()
+        self.assertEqual(unread, 0)
 
     def test_unread_count(self):
         """Test getting unread notification count."""
-        Notification.objects.create(recipient=self.user, actor=self.actor, verb='followed')
-        Notification.objects.create(recipient=self.user, actor=self.actor, verb='rated')
+        Notification.objects.create(
+            recipient=self.user, actor=self.actor, verb='followed'
+        )
+        Notification.objects.create(
+            recipient=self.user, actor=self.actor, verb='rated'
+        )
         self.client.force_authenticate(user=self.user)
         url = reverse('interaction:notification-unread-count')
         res = self.client.get(url)
@@ -572,7 +609,10 @@ class NotificationAPITests(TestCase):
             verb='followed',
         )
         self.client.force_authenticate(user=self.user)
-        url = reverse('interaction:notification-mark-read', kwargs={'pk': notification.id})
+        url = reverse(
+            'interaction:notification-mark-read',
+            kwargs={'pk': notification.id},
+        )
         res = self.client.post(url)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
@@ -616,15 +656,15 @@ class FeedAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_feed_with_order_param(self):
-        """Test feed with order parameter returns items in chronological order."""
+        """Test feed with order param returns items chronologically."""
         from recipe.models import Recipe
-        recipe1 = Recipe.objects.create(
+        Recipe.objects.create(
             author=self.followed_user,
             title='First Recipe',
             instructions='Test',
             is_published=True,
         )
-        recipe2 = Recipe.objects.create(
+        Recipe.objects.create(
             author=self.followed_user,
             title='Second Recipe',
             instructions='Test',
@@ -637,8 +677,12 @@ class FeedAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data['results']), 2)
         # Second recipe should be first (reverse chronological)
-        self.assertEqual(res.data['results'][0]['recipe']['title'], 'Second Recipe')
-        self.assertEqual(res.data['results'][1]['recipe']['title'], 'First Recipe')
+        self.assertEqual(
+            res.data['results'][0]['recipe']['title'], 'Second Recipe'
+        )
+        self.assertEqual(
+            res.data['results'][1]['recipe']['title'], 'First Recipe'
+        )
 
 
 class DiscoveryAPITests(TestCase):

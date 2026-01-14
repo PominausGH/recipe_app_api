@@ -1,7 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -9,9 +12,7 @@ from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
 
 from interaction.models import (
-    Follow, FollowRequest, Block, Mute,
-    Notification, NotificationPreference, FeedPreference,
-    Badge, UserBadge
+    Follow, FollowRequest, Block, Mute, Notification,
 )
 from interaction.serializers import (
     FollowSerializer, FollowRequestSerializer,
@@ -35,7 +36,11 @@ class UserViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         return get_user_model().objects.all()
 
-    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
     def follow(self, request, pk=None):
         """Follow or unfollow a user."""
         target_user = get_object_or_404(get_user_model(), pk=pk)
@@ -47,7 +52,10 @@ class UserViewSet(viewsets.GenericViewSet):
             )
 
         # Check if blocked
-        if Block.objects.filter(user=target_user, blocked_user=request.user).exists():
+        blocked = Block.objects.filter(
+            user=target_user, blocked_user=request.user
+        ).exists()
+        if blocked:
             return Response(
                 {'error': 'Unable to follow this user.'},
                 status=status.HTTP_403_FORBIDDEN
@@ -65,7 +73,10 @@ class UserViewSet(viewsets.GenericViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         # POST - follow
-        if Follow.objects.filter(follower=request.user, following=target_user).exists():
+        already_following = Follow.objects.filter(
+            follower=request.user, following=target_user
+        ).exists()
+        if already_following:
             return Response(
                 {'error': 'Already following this user.'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -91,7 +102,9 @@ class UserViewSet(viewsets.GenericViewSet):
     def followers(self, request, pk=None):
         """List user's followers."""
         user = get_object_or_404(get_user_model(), pk=pk)
-        follows = Follow.objects.filter(following=user).select_related('follower')
+        follows = Follow.objects.filter(
+            following=user
+        ).select_related('follower')
         page = self.paginate_queryset(follows)
         serializer = FollowSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
@@ -100,13 +113,20 @@ class UserViewSet(viewsets.GenericViewSet):
     def following(self, request, pk=None):
         """List who user follows."""
         user = get_object_or_404(get_user_model(), pk=pk)
-        follows = Follow.objects.filter(follower=user).select_related('following')
+        follows = Follow.objects.filter(
+            follower=user
+        ).select_related('following')
         page = self.paginate_queryset(follows)
         serializer = FollowSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated],
-            url_path='me/follow-requests', url_name='follow-requests')
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated],
+        url_path='me/follow-requests',
+        url_name='follow-requests',
+    )
     def follow_requests(self, request):
         """List pending follow requests for current user."""
         requests = FollowRequest.objects.filter(
@@ -117,8 +137,13 @@ class UserViewSet(viewsets.GenericViewSet):
         serializer = FollowRequestSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated],
-            url_path='accept', url_name='accept-request')
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAuthenticated],
+        url_path='accept',
+        url_name='accept-request',
+    )
     def accept_request(self, request, pk=None):
         """Accept a follow request."""
         follow_request = get_object_or_404(
@@ -139,8 +164,13 @@ class UserViewSet(viewsets.GenericViewSet):
         serializer = FollowRequestSerializer(follow_request)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated],
-            url_path='reject', url_name='reject-request')
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAuthenticated],
+        url_path='reject',
+        url_name='reject-request',
+    )
     def reject_request(self, request, pk=None):
         """Reject a follow request."""
         follow_request = get_object_or_404(
@@ -155,7 +185,11 @@ class UserViewSet(viewsets.GenericViewSet):
         serializer = FollowRequestSerializer(follow_request)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
     def block(self, request, pk=None):
         """Block or unblock a user."""
         target_user = get_object_or_404(get_user_model(), pk=pk)
@@ -180,15 +214,27 @@ class UserViewSet(viewsets.GenericViewSet):
                 blocked_user=target_user
             )
             # Remove follows in both directions
-            Follow.objects.filter(follower=request.user, following=target_user).delete()
-            Follow.objects.filter(follower=target_user, following=request.user).delete()
-            FollowRequest.objects.filter(requester=request.user, target=target_user).delete()
-            FollowRequest.objects.filter(requester=target_user, target=request.user).delete()
+            Follow.objects.filter(
+                follower=request.user, following=target_user
+            ).delete()
+            Follow.objects.filter(
+                follower=target_user, following=request.user
+            ).delete()
+            FollowRequest.objects.filter(
+                requester=request.user, target=target_user
+            ).delete()
+            FollowRequest.objects.filter(
+                requester=target_user, target=request.user
+            ).delete()
 
         serializer = BlockSerializer(block)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
     def mute(self, request, pk=None):
         """Mute or unmute a user."""
         target_user = get_object_or_404(get_user_model(), pk=pk)
@@ -214,32 +260,48 @@ class UserViewSet(viewsets.GenericViewSet):
         serializer = MuteSerializer(mute)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated],
-            url_path='me/blocked', url_name='blocked-list')
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated],
+        url_path='me/blocked',
+        url_name='blocked-list',
+    )
     def blocked_list(self, request):
         """List blocked users."""
-        blocks = Block.objects.filter(user=request.user).select_related('blocked_user')
+        blocks = Block.objects.filter(
+            user=request.user
+        ).select_related('blocked_user')
         page = self.paginate_queryset(blocks)
         serializer = BlockSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated],
-            url_path='me/muted', url_name='muted-list')
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated],
+        url_path='me/muted',
+        url_name='muted-list',
+    )
     def muted_list(self, request):
         """List muted users."""
-        mutes = Mute.objects.filter(user=request.user).select_related('muted_user')
+        mutes = Mute.objects.filter(
+            user=request.user
+        ).select_related('muted_user')
         page = self.paginate_queryset(mutes)
         serializer = MuteSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(
+        detail=False, methods=['get'], permission_classes=[IsAuthenticated]
+    )
     def search(self, request):
         """Search users by name or email."""
         query = request.query_params.get('q', '')
         if len(query) < 2:
             return Response({'results': []})
 
-        # Get users who have blocked the requesting user or who they have blocked
+        # Get users who blocked the requesting user or were blocked by them
         blocked_user_ids = Block.objects.filter(
             Q(user=request.user) | Q(blocked_user=request.user)
         ).values_list('user_id', 'blocked_user_id')
@@ -247,8 +309,10 @@ class UserViewSet(viewsets.GenericViewSet):
         for blocker_id, blocked_id in blocked_user_ids:
             excluded_ids.add(blocker_id)
             excluded_ids.add(blocked_id)
-        excluded_ids.discard(request.user.pk)  # Don't exclude self from excluded set
-        excluded_ids.add(request.user.pk)  # But do exclude self from results
+        # Don't exclude self from excluded set
+        excluded_ids.discard(request.user.pk)
+        # But do exclude self from results
+        excluded_ids.add(request.user.pk)
 
         users = get_user_model().objects.filter(
             Q(name__icontains=query) | Q(email__icontains=query)
@@ -284,7 +348,9 @@ class UserViewSet(viewsets.GenericViewSet):
         serializer = UserSummarySerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(
+        detail=False, methods=['get'], permission_classes=[IsAuthenticated]
+    )
     def suggested(self, request):
         """Get suggested users based on who you follow."""
         # Get users followed by people you follow
@@ -332,7 +398,9 @@ class NotificationViewSet(viewsets.GenericViewSet):
         serializer = NotificationSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, methods=['post'], url_path='read', url_name='mark-read')
+    @action(
+        detail=True, methods=['post'], url_path='read', url_name='mark-read'
+    )
     def mark_read(self, request, pk=None):
         """Mark notification as read."""
         notification = get_object_or_404(self.get_queryset(), pk=pk)
@@ -341,13 +409,23 @@ class NotificationViewSet(viewsets.GenericViewSet):
         serializer = NotificationSerializer(notification)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'], url_path='read', url_name='mark-all-read')
+    @action(
+        detail=False,
+        methods=['post'],
+        url_path='read',
+        url_name='mark-all-read',
+    )
     def mark_all_read(self, request):
         """Mark all notifications as read."""
         self.get_queryset().update(is_read=True)
         return Response({'status': 'all notifications marked as read'})
 
-    @action(detail=False, methods=['get'], url_path='unread-count', url_name='unread-count')
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='unread-count',
+        url_name='unread-count',
+    )
     def unread_count(self, request):
         """Get unread notification count."""
         count = self.get_queryset().filter(is_read=False).count()

@@ -5,7 +5,6 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from recipe.models import Recipe
 from taxonomy.models import Category, Tag
-from interaction.models import Rating, Favorite, Comment
 
 
 class FullUserJourneyTest(TestCase):
@@ -25,7 +24,9 @@ class FullUserJourneyTest(TestCase):
             password='testpass123',
             name='Existing Chef',
         )
-        self.category = Category.objects.create(name='Desserts', slug='desserts')
+        self.category = Category.objects.create(
+            name='Desserts', slug='desserts'
+        )
         self.tag_easy = Tag.objects.create(name='Easy', slug='easy')
         self.tag_quick = Tag.objects.create(name='Quick', slug='quick')
 
@@ -67,13 +68,17 @@ class FullUserJourneyTest(TestCase):
         self.assertEqual(len(res.data['results']), 1)
 
         # View recipe detail
-        detail_url = reverse('recipe:recipe-detail', args=[self.existing_recipe.id])
+        detail_url = reverse(
+            'recipe:recipe-detail', args=[self.existing_recipe.id]
+        )
         res = self.client.get(detail_url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data['title'], 'Chocolate Cake')
 
         # Read comments (empty for now)
-        comments_url = reverse('recipe:recipe-comments', args=[self.existing_recipe.id])
+        comments_url = reverse(
+            'recipe:recipe-comments', args=[self.existing_recipe.id]
+        )
         res = self.client.get(comments_url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 0)
@@ -107,7 +112,9 @@ class FullUserJourneyTest(TestCase):
         # ========================================
 
         # Rate the existing recipe
-        rate_url = reverse('recipe:recipe-rate', args=[self.existing_recipe.id])
+        rate_url = reverse(
+            'recipe:recipe-rate', args=[self.existing_recipe.id]
+        )
         res = self.client.post(rate_url, {
             'score': 5,
             'review': 'Absolutely delicious! Made it for my family.',
@@ -115,7 +122,9 @@ class FullUserJourneyTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         # Add to favorites
-        favorite_url = reverse('recipe:recipe-favorite', args=[self.existing_recipe.id])
+        favorite_url = reverse(
+            'recipe:recipe-favorite', args=[self.existing_recipe.id]
+        )
         res = self.client.post(favorite_url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
@@ -138,7 +147,9 @@ class FullUserJourneyTest(TestCase):
         res = self.client.post(recipes_url, {
             'title': 'My Famous Cookies',
             'description': 'Crispy on the outside, chewy on the inside',
-            'instructions': '1. Mix butter and sugar\n2. Add flour\n3. Bake at 375F',
+            'instructions': (
+                '1. Mix butter and sugar\n2. Add flour\n3. Bake at 375F'
+            ),
             'prep_time': 15,
             'cook_time': 12,
             'servings': 24,
@@ -170,7 +181,9 @@ class FullUserJourneyTest(TestCase):
         self.client.force_authenticate(user=self.existing_chef)
 
         # Rate the new recipe
-        new_recipe_rate_url = reverse('recipe:recipe-rate', args=[my_recipe_id])
+        new_recipe_rate_url = reverse(
+            'recipe:recipe-rate', args=[my_recipe_id]
+        )
         res = self.client.post(new_recipe_rate_url, {
             'score': 4,
             'review': 'Nice recipe!',

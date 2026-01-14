@@ -1,4 +1,5 @@
-from .base import *
+from .base import *  # noqa: F401, F403
+import os  # noqa: E402
 
 DEBUG = True
 
@@ -15,4 +16,4 @@ DATABASES = {
 }
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'media'  # noqa: F405

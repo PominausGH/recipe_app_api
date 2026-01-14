@@ -1,7 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
@@ -70,7 +73,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Create a new recipe."""
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(
+        detail=True, methods=['post'], permission_classes=[IsAuthenticated]
+    )
     def rate(self, request, pk=None):
         """Rate a recipe or update existing rating."""
         recipe = self.get_object()
@@ -84,10 +89,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
         output_serializer = RatingSerializer(rating)
-        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        if created:
+            status_code = status.HTTP_201_CREATED
+        else:
+            status_code = status.HTTP_200_OK
         return Response(output_serializer.data, status=status_code)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(
+        detail=True, methods=['post'], permission_classes=[IsAuthenticated]
+    )
     def favorite(self, request, pk=None):
         """Toggle favorite status for a recipe."""
         recipe = self.get_object()
@@ -106,7 +116,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = FavoriteSerializer(favorite)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=['get', 'post'], permission_classes=[IsAuthenticatedOrReadOnly])
+    @action(
+        detail=True,
+        methods=['get', 'post'],
+        permission_classes=[IsAuthenticatedOrReadOnly],
+    )
     def comments(self, request, pk=None):
         """List or create comments for a recipe."""
         recipe = self.get_object()

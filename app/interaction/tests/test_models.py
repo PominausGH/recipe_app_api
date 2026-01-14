@@ -262,9 +262,13 @@ class FollowRequestModelTests(TestCase):
 
     def test_follow_request_unique_constraint(self):
         """Test only one pending request per user pair."""
-        FollowRequest.objects.create(requester=self.user1, target=self.user2)
+        FollowRequest.objects.create(
+            requester=self.user1, target=self.user2
+        )
         with self.assertRaises(IntegrityError):
-            FollowRequest.objects.create(requester=self.user1, target=self.user2)
+            FollowRequest.objects.create(
+                requester=self.user1, target=self.user2
+            )
 
     def test_follow_request_str(self):
         """Test follow request string representation."""
@@ -272,7 +276,7 @@ class FollowRequestModelTests(TestCase):
             requester=self.user1,
             target=self.user2,
         )
-        expected = f'{self.user1.email} requested to follow {self.user2.email}'
+        expected = f'{self.user1.email} requested {self.user2.email}'
         self.assertEqual(str(request), expected)
 
 

@@ -60,10 +60,22 @@ TEMPLATES = [
 WSGI_APPLICATION = 'app.wsgi.application'
 
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {
+        'NAME': 'django.contrib.auth.password_validation.'
+                'UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.'
+                'MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.'
+                'CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.'
+                'NumericPasswordValidator',
+    },
 ]
 
 LANGUAGE_CODE = 'en-us'
@@ -89,7 +101,9 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': (
+        'rest_framework.pagination.PageNumberPagination'
+    ),
     'PAGE_SIZE': 20,
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
@@ -105,7 +119,10 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Recipe App API',
-    'DESCRIPTION': 'API for managing recipes, users, ratings, comments, and social features',
+    'DESCRIPTION': (
+        'API for managing recipes, users, ratings, comments, and social '
+        'features'
+    ),
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,

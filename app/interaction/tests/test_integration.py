@@ -8,7 +8,7 @@ from interaction.models import Rating, Favorite, Comment
 
 
 class RecipeInteractionIntegrationTests(TestCase):
-    """Integration tests for recipe interactions (ratings, favorites, comments)."""
+    """Integration tests for recipe interactions."""
 
     def setUp(self):
         self.client = APIClient()
@@ -67,11 +67,16 @@ class RecipeInteractionIntegrationTests(TestCase):
         self.client.post(rate_url, {'score': 3})
 
         # Update rating
-        res = self.client.post(rate_url, {'score': 5, 'review': 'Changed my mind!'})
+        res = self.client.post(
+            rate_url, {'score': 5, 'review': 'Changed my mind!'}
+        )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
         # Verify only one rating exists
-        self.assertEqual(Rating.objects.filter(user=self.user, recipe=self.recipe).count(), 1)
+        count = Rating.objects.filter(
+            user=self.user, recipe=self.recipe
+        ).count()
+        self.assertEqual(count, 1)
         rating = Rating.objects.get(user=self.user, recipe=self.recipe)
         self.assertEqual(rating.score, 5)
 
@@ -83,17 +88,29 @@ class RecipeInteractionIntegrationTests(TestCase):
         # Add to favorites
         res = self.client.post(favorite_url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Favorite.objects.filter(user=self.user, recipe=self.recipe).exists())
+        self.assertTrue(
+            Favorite.objects.filter(
+                user=self.user, recipe=self.recipe
+            ).exists()
+        )
 
         # Toggle off (remove from favorites)
         res = self.client.post(favorite_url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertFalse(Favorite.objects.filter(user=self.user, recipe=self.recipe).exists())
+        self.assertFalse(
+            Favorite.objects.filter(
+                user=self.user, recipe=self.recipe
+            ).exists()
+        )
 
         # Toggle on again
         res = self.client.post(favorite_url)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Favorite.objects.filter(user=self.user, recipe=self.recipe).exists())
+        self.assertTrue(
+            Favorite.objects.filter(
+                user=self.user, recipe=self.recipe
+            ).exists()
+        )
 
     def test_comment_thread(self):
         """Test creating comments and replies."""

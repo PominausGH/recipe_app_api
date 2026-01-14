@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from recipe.models import Recipe, Ingredient
-from taxonomy.models import Category, Tag
 
 
 class IngredientSerializer(serializers.ModelSerializer):

@@ -163,7 +163,7 @@ class PrivateAuthAPITests(TestCase):
 
     def test_cannot_update_email(self):
         """Test email cannot be changed via profile update."""
-        res = self.client.patch(ME_URL, {'email': 'new@example.com'})
+        self.client.patch(ME_URL, {'email': 'new@example.com'})
 
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, 'test@example.com')

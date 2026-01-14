@@ -71,7 +71,9 @@ class AuthFlowIntegrationTests(TestCase):
 
         # Step 6: Use new access token
         new_access_token = res.data['access']
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {new_access_token}')
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f'Bearer {new_access_token}'
+        )
 
         res = self.client.get(me_url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -87,7 +89,7 @@ class AuthFlowIntegrationTests(TestCase):
     def test_expired_token_can_be_refreshed(self):
         """Test token refresh workflow."""
         # Create and login user
-        user = get_user_model().objects.create_user(
+        get_user_model().objects.create_user(
             email='test@example.com',
             password='testpass123',
         )

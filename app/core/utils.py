@@ -113,7 +113,8 @@ def validate_image(image_file):
     try:
         img = Image.open(image_file)
         if img.format.lower() not in allowed_formats:
-            return False, f'Image format must be one of: {", ".join(allowed_formats)}.'
+            formats = ', '.join(allowed_formats)
+            return False, f'Image format must be one of: {formats}.'
         image_file.seek(0)  # Reset file pointer
     except Exception:
         return False, 'Invalid image file.'

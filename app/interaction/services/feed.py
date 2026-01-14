@@ -1,4 +1,3 @@
-from django.db.models import Q
 from interaction.models import Follow, Mute, FeedPreference, Rating, Favorite
 from recipe.models import Recipe
 

@@ -141,7 +141,7 @@ class FollowRequest(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.requester.email} requested to follow {self.target.email}'
+        return f'{self.requester.email} requested {self.target.email}'
 
 
 class Block(models.Model):

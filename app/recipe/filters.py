@@ -18,7 +18,9 @@ class RecipeFilter(filters.FilterSet):
     def filter_tags(self, queryset, name, value):
         """Filter by tags (comma-separated IDs)."""
         if value:
-            tag_ids = [int(id.strip()) for id in value.split(',') if id.strip()]
+            tag_ids = [
+                int(id.strip()) for id in value.split(',') if id.strip()
+            ]
             if tag_ids:
                 return queryset.filter(tags__id__in=tag_ids).distinct()
         return queryset
@@ -32,6 +34,9 @@ class RecipeFilter(filters.FilterSet):
             from django.db.models.functions import Coalesce
 
             return queryset.annotate(
-                _total_time_calc=Coalesce(F('prep_time'), Value(0)) + Coalesce(F('cook_time'), Value(0))
+                _total_time_calc=(
+                    Coalesce(F('prep_time'), Value(0)) +
+                    Coalesce(F('cook_time'), Value(0))
+                )
             ).filter(_total_time_calc__lte=value)
         return queryset

@@ -36,7 +36,7 @@ class RecipeCRUDIntegrationTests(TestCase):
         recipe_payload = {
             'title': 'Grilled Salmon',
             'description': 'Delicious grilled salmon with herbs',
-            'instructions': '1. Season salmon\n2. Grill for 10 minutes\n3. Serve',
+            'instructions': '1. Season salmon\n2. Grill 10 min\n3. Serve',
             'prep_time': 15,
             'cook_time': 10,
             'servings': 2,
@@ -99,7 +99,7 @@ class RecipeCRUDIntegrationTests(TestCase):
     def test_draft_recipe_visibility(self):
         """Test that draft recipes are only visible to owner."""
         # Create draft recipe
-        draft_recipe = Recipe.objects.create(
+        Recipe.objects.create(
             author=self.user,
             title='Draft Recipe',
             instructions='Secret recipe',

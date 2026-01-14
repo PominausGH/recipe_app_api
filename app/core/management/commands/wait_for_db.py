@@ -4,6 +4,7 @@ from django.db import connections
 from django.db.utils import OperationalError
 from django.core.management.base import BaseCommand
 
+
 class Command(BaseCommand):
     """ django command to wait for db"""
 
@@ -13,9 +14,8 @@ class Command(BaseCommand):
         db_conn = None
         while not db_conn:
             try:
-                # self.check(databases=['default'])
                 db_conn = connections['default']
-            except (OperationalError):
+            except OperationalError:
                 self.stdout.write('Database unavailable, waiting 1 seconds...')
                 time.sleep(1)
 

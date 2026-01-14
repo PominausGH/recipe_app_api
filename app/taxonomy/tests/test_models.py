@@ -16,7 +16,9 @@ class CategoryModelTests(TestCase):
 
     def test_category_hierarchy(self):
         """Test category parent-child relationship."""
-        parent = Category.objects.create(name='Main Dishes', slug='main-dishes')
+        parent = Category.objects.create(
+            name='Main Dishes', slug='main-dishes'
+        )
         child = Category.objects.create(
             name='Pasta',
             slug='pasta',
