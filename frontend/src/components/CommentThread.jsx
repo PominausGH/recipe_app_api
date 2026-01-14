@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useAddComment } from '../hooks/useRecipes';
-import { Button, Input } from './ui';
-import { UserLink } from './UserLink';
+import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { useAddComment } from "../hooks/useRecipes";
+import { Button, Input } from "./ui";
+import { UserLink } from "./UserLink";
 
 function Comment({ comment, recipeId }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
-  const [replyText, setReplyText] = useState('');
+  const [replyText, setReplyText] = useState("");
   const { isAuthenticated } = useAuth();
   const addComment = useAddComment();
 
@@ -18,7 +18,7 @@ function Comment({ comment, recipeId }) {
       text: replyText,
       parentId: comment.id,
     });
-    setReplyText('');
+    setReplyText("");
     setShowReplyForm(false);
   };
 
@@ -66,7 +66,7 @@ function Comment({ comment, recipeId }) {
 }
 
 export function CommentThread({ comments, recipeId }) {
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const { isAuthenticated } = useAuth();
   const addComment = useAddComment();
 
@@ -74,7 +74,7 @@ export function CommentThread({ comments, recipeId }) {
     e.preventDefault();
     if (!newComment.trim()) return;
     await addComment.mutateAsync({ recipeId, text: newComment });
-    setNewComment('');
+    setNewComment("");
   };
 
   const topLevelComments = comments?.filter((c) => !c.parent) || [];
@@ -97,7 +97,8 @@ export function CommentThread({ comments, recipeId }) {
 
       {topLevelComments.length === 0 ? (
         <p className="text-gray-500 text-center py-4">
-          No comments yet. {isAuthenticated ? 'Be the first to comment!' : 'Login to comment.'}
+          No comments yet.{" "}
+          {isAuthenticated ? "Be the first to comment!" : "Login to comment."}
         </p>
       ) : (
         <div className="space-y-4">

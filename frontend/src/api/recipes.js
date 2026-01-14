@@ -1,8 +1,8 @@
-import client from './client';
+import client from "./client";
 
 export const recipesApi = {
   async list(params = {}) {
-    const response = await client.get('/recipes/', { params });
+    const response = await client.get("/recipes/", { params });
     return response.data;
   },
 
@@ -12,7 +12,7 @@ export const recipesApi = {
   },
 
   async create(data) {
-    const response = await client.post('/recipes/', data);
+    const response = await client.post("/recipes/", data);
     return response.data;
   },
 
@@ -27,15 +27,22 @@ export const recipesApi = {
 
   async uploadImage(id, file) {
     const formData = new FormData();
-    formData.append('image', file);
-    const response = await client.post(`/recipes/${id}/upload-image/`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    formData.append("image", file);
+    const response = await client.post(
+      `/recipes/${id}/upload-image/`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    );
     return response.data;
   },
 
-  async rate(id, score, review = '') {
-    const response = await client.post(`/recipes/${id}/rate/`, { score, review });
+  async rate(id, score, review = "") {
+    const response = await client.post(`/recipes/${id}/rate/`, {
+      score,
+      review,
+    });
     return response.data;
   },
 
@@ -57,7 +64,9 @@ export const recipesApi = {
   },
 
   async getMyRecipes(params = {}) {
-    const response = await client.get('/recipes/', { params: { ...params, author: 'me' } });
+    const response = await client.get("/recipes/", {
+      params: { ...params, author: "me" },
+    });
     return response.data;
   },
 };

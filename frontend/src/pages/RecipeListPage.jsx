@@ -1,19 +1,19 @@
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useRecipes } from '../hooks/useRecipes';
-import { useDebounce } from '../hooks/useDebounce';
-import { RecipeCard } from '../components/RecipeCard';
-import { RecipeFilters } from '../components/RecipeFilters';
-import { Spinner, Button } from '../components/ui';
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useRecipes } from "../hooks/useRecipes";
+import { useDebounce } from "../hooks/useDebounce";
+import { RecipeCard } from "../components/RecipeCard";
+import { RecipeFilters } from "../components/RecipeFilters";
+import { Spinner, Button } from "../components/ui";
 
 export function RecipeListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    difficulty: searchParams.get('difficulty') || '',
-    max_time: searchParams.get('max_time') || '',
-    ordering: searchParams.get('ordering') || '-created_at',
-    page: parseInt(searchParams.get('page') || '1', 10),
+    search: searchParams.get("search") || "",
+    difficulty: searchParams.get("difficulty") || "",
+    max_time: searchParams.get("max_time") || "",
+    ordering: searchParams.get("ordering") || "-created_at",
+    page: parseInt(searchParams.get("page") || "1", 10),
   });
 
   const debouncedSearch = useDebounce(filters.search, 300);
@@ -39,10 +39,10 @@ export function RecipeListPage() {
 
   const handleClearFilters = () => {
     setFilters({
-      search: '',
-      difficulty: '',
-      max_time: '',
-      ordering: '-created_at',
+      search: "",
+      difficulty: "",
+      max_time: "",
+      ordering: "-created_at",
       page: 1,
     });
     setSearchParams({});
@@ -50,7 +50,7 @@ export function RecipeListPage() {
 
   const handlePageChange = (newPage) => {
     setFilters((prev) => ({ ...prev, page: newPage }));
-    searchParams.set('page', newPage.toString());
+    searchParams.set("page", newPage.toString());
     setSearchParams(searchParams);
   };
 

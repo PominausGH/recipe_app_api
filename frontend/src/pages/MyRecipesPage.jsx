@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useRecipes } from '../hooks/useRecipes';
-import { useAuth } from '../hooks/useAuth';
-import { RecipeCard } from '../components/RecipeCard';
-import { Button, Spinner } from '../components/ui';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useRecipes } from "../hooks/useRecipes";
+import { useAuth } from "../hooks/useAuth";
+import { RecipeCard } from "../components/RecipeCard";
+import { Button, Spinner } from "../components/ui";
 
 export function MyRecipesPage() {
   const { user } = useAuth();
@@ -32,8 +32,8 @@ export function MyRecipesPage() {
           onClick={() => setShowDrafts(false)}
           className={`px-4 py-2 rounded-md ${
             !showDrafts
-              ? 'bg-primary-600 text-white'
-              : 'bg-gray-100 text-gray-700'
+              ? "bg-primary-600 text-white"
+              : "bg-gray-100 text-gray-700"
           }`}
         >
           Published ({publishedRecipes.length})
@@ -42,8 +42,8 @@ export function MyRecipesPage() {
           onClick={() => setShowDrafts(true)}
           className={`px-4 py-2 rounded-md ${
             showDrafts
-              ? 'bg-primary-600 text-white'
-              : 'bg-gray-100 text-gray-700'
+              ? "bg-primary-600 text-white"
+              : "bg-gray-100 text-gray-700"
           }`}
         >
           Drafts ({draftRecipes.length})
@@ -57,8 +57,8 @@ export function MyRecipesPage() {
       ) : displayedRecipes.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           {showDrafts
-            ? 'No draft recipes.'
-            : 'No published recipes yet. Create your first recipe!'}
+            ? "No draft recipes."
+            : "No published recipes yet. Create your first recipe!"}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

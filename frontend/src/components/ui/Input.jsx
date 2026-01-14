@@ -1,8 +1,8 @@
-import { forwardRef } from 'react';
+import { forwardRef } from "react";
 
 export const Input = forwardRef(function Input(
-  { label, error, className = '', ...props },
-  ref
+  { label, error, className = "", ...props },
+  ref,
 ) {
   return (
     <div className="w-full">
@@ -16,7 +16,7 @@ export const Input = forwardRef(function Input(
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm
           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
-          ${error ? 'border-red-500' : 'border-gray-300'}
+          ${error ? "border-red-500" : "border-gray-300"}
           ${className}
         `}
         {...props}

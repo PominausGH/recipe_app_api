@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { Button } from './ui';
+import { Component } from "react";
+import { Button } from "./ui";
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -12,7 +12,7 @@ export class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error("Error caught by boundary:", error, errorInfo);
   }
 
   handleReset = () => {
@@ -33,12 +33,11 @@ export class ErrorBoundary extends Component {
               Something went wrong
             </h2>
             <p className="text-gray-600 mb-6">
-              We encountered an unexpected error. Please try again or refresh the page.
+              We encountered an unexpected error. Please try again or refresh
+              the page.
             </p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={this.handleReset}>
-                Try Again
-              </Button>
+              <Button onClick={this.handleReset}>Try Again</Button>
               <Button
                 variant="secondary"
                 onClick={() => window.location.reload()}

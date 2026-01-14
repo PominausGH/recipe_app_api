@@ -1,13 +1,25 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useState } from 'react';
-import { useRecipe, useRecipeComments, useRateRecipe, useToggleFavorite, useDeleteRecipe } from '../hooks/useRecipes';
-import { useAuth } from '../hooks/useAuth';
-import { RatingStars } from '../components/RatingStars';
-import { IngredientList } from '../components/IngredientList';
-import { CommentThread } from '../components/CommentThread';
-import { Button, Card, Spinner } from '../components/ui';
-import { HeartIcon, ClockIcon, UserGroupIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import {
+  useRecipe,
+  useRecipeComments,
+  useRateRecipe,
+  useToggleFavorite,
+  useDeleteRecipe,
+} from "../hooks/useRecipes";
+import { useAuth } from "../hooks/useAuth";
+import { RatingStars } from "../components/RatingStars";
+import { IngredientList } from "../components/IngredientList";
+import { CommentThread } from "../components/CommentThread";
+import { Button, Card, Spinner } from "../components/ui";
+import {
+  HeartIcon,
+  ClockIcon,
+  UserGroupIcon,
+  PencilIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 
 export function RecipeDetailPage() {
   const { id } = useParams();
@@ -33,9 +45,9 @@ export function RecipeDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this recipe?')) {
+    if (window.confirm("Are you sure you want to delete this recipe?")) {
       await deleteRecipe.mutateAsync(id);
-      navigate('/my-recipes');
+      navigate("/my-recipes");
     }
   };
 
@@ -50,7 +62,9 @@ export function RecipeDetailPage() {
   if (error || !recipe) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Recipe Not Found</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          Recipe Not Found
+        </h2>
         <Link to="/recipes">
           <Button>Browse Recipes</Button>
         </Link>
@@ -63,7 +77,11 @@ export function RecipeDetailPage() {
       {/* Header Image */}
       {recipe.image && (
         <div className="aspect-video rounded-lg overflow-hidden mb-6">
-          <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
+          <img
+            src={recipe.image}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+          />
         </div>
       )}
 
@@ -71,7 +89,7 @@ export function RecipeDetailPage() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">{recipe.title}</h1>
-          <p className="text-gray-600">by {recipe.author?.name || 'Unknown'}</p>
+          <p className="text-gray-600">by {recipe.author?.name || "Unknown"}</p>
         </div>
         <div className="flex gap-2">
           {isAuthenticated && !isOwner && (
@@ -107,7 +125,10 @@ export function RecipeDetailPage() {
       {/* Stats */}
       <div className="flex flex-wrap gap-6 mb-6">
         <div className="flex items-center gap-2">
-          <RatingStars rating={recipe.average_rating || 0} count={recipe.rating_count} />
+          <RatingStars
+            rating={recipe.average_rating || 0}
+            count={recipe.rating_count}
+          />
         </div>
         {totalTime > 0 && (
           <div className="flex items-center gap-2 text-gray-600">
@@ -135,7 +156,11 @@ export function RecipeDetailPage() {
             <div className="flex items-center gap-4">
               <span>Your rating:</span>
               <RatingStars interactive onRate={handleRate} size="lg" />
-              <Button variant="ghost" size="sm" onClick={() => setShowRatingForm(false)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowRatingForm(false)}
+              >
                 Cancel
               </Button>
             </div>

@@ -1,14 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { recipesApi } from '../api/recipes';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { recipesApi } from "../api/recipes";
 
 export const recipeKeys = {
-  all: ['recipes'],
-  lists: () => [...recipeKeys.all, 'list'],
+  all: ["recipes"],
+  lists: () => [...recipeKeys.all, "list"],
   list: (filters) => [...recipeKeys.lists(), filters],
-  details: () => [...recipeKeys.all, 'detail'],
+  details: () => [...recipeKeys.all, "detail"],
   detail: (id) => [...recipeKeys.details(), id],
-  comments: (id) => [...recipeKeys.detail(id), 'comments'],
-  myRecipes: () => [...recipeKeys.all, 'my'],
+  comments: (id) => [...recipeKeys.detail(id), "comments"],
+  myRecipes: () => [...recipeKeys.all, "my"],
 };
 
 export function useRecipes(filters = {}) {
@@ -90,9 +90,12 @@ export function useToggleFavorite() {
 export function useAddComment() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ recipeId, text, parentId }) => recipesApi.addComment(recipeId, text, parentId),
+    mutationFn: ({ recipeId, text, parentId }) =>
+      recipesApi.addComment(recipeId, text, parentId),
     onSuccess: (_, { recipeId }) => {
-      queryClient.invalidateQueries({ queryKey: recipeKeys.comments(recipeId) });
+      queryClient.invalidateQueries({
+        queryKey: recipeKeys.comments(recipeId),
+      });
     },
   });
 }

@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom';
-import { ClockIcon, StarIcon } from '@heroicons/react/24/solid';
-import { Card } from './ui';
-import { UserLink } from './UserLink';
+import { Link } from "react-router-dom";
+import { ClockIcon, StarIcon } from "@heroicons/react/24/solid";
+import { Card } from "./ui";
+import { UserLink } from "./UserLink";
 
 const difficultyColors = {
-  easy: 'bg-green-100 text-green-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  hard: 'bg-red-100 text-red-800',
+  easy: "bg-green-100 text-green-800",
+  medium: "bg-yellow-100 text-yellow-800",
+  hard: "bg-red-100 text-red-800",
 };
 
 export function RecipeCard({ recipe }) {
@@ -38,7 +38,9 @@ export function RecipeCard({ recipe }) {
           )}
         </div>
         <Card.Body>
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2">{recipe.title}</h3>
+          <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+            {recipe.title}
+          </h3>
           <div className="text-gray-600 text-sm mb-3">
             by <UserLink user={recipe.author} showPhoto={false} disableLink />
           </div>
@@ -46,7 +48,7 @@ export function RecipeCard({ recipe }) {
             <div className="flex items-center gap-1">
               <StarIcon className="h-4 w-4 text-yellow-400" />
               <span>
-                {recipe.average_rating?.toFixed(1) || 'N/A'}
+                {recipe.average_rating?.toFixed(1) || "N/A"}
                 {recipe.rating_count > 0 && ` (${recipe.rating_count})`}
               </span>
             </div>

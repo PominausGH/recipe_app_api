@@ -1,26 +1,36 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useAuth } from '../../hooks/useAuth';
-import { Button, Input } from '../../components/ui';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useAuth } from "../../hooks/useAuth";
+import { Button, Input } from "../../components/ui";
 
 export function RegisterForm({ onSuccess }) {
   const { register: registerUser } = useAuth();
-  const [error, setError] = useState('');
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm();
-  const password = watch('password');
+  const [error, setError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm();
+  const password = watch("password");
 
   const onSubmit = async (data) => {
     try {
-      setError('');
-      await registerUser(data.email, data.name, data.password, data.password_confirm);
+      setError("");
+      await registerUser(
+        data.email,
+        data.name,
+        data.password,
+        data.password_confirm,
+      );
       onSuccess?.();
     } catch (err) {
       const errorData = err.response?.data;
       if (errorData) {
-        const messages = Object.values(errorData).flat().join(' ');
-        setError(messages || 'Registration failed.');
+        const messages = Object.values(errorData).flat().join(" ");
+        setError(messages || "Registration failed.");
       } else {
-        setError('Registration failed. Please try again.');
+        setError("Registration failed. Please try again.");
       }
     }
   };
@@ -35,23 +45,26 @@ export function RegisterForm({ onSuccess }) {
 
       <Input
         label="Name"
-        {...register('name', { required: 'Name is required' })}
+        {...register("name", { required: "Name is required" })}
         error={errors.name?.message}
       />
 
       <Input
         label="Email"
         type="email"
-        {...register('email', { required: 'Email is required' })}
+        {...register("email", { required: "Email is required" })}
         error={errors.email?.message}
       />
 
       <Input
         label="Password"
         type="password"
-        {...register('password', {
-          required: 'Password is required',
-          minLength: { value: 8, message: 'Password must be at least 8 characters' },
+        {...register("password", {
+          required: "Password is required",
+          minLength: {
+            value: 8,
+            message: "Password must be at least 8 characters",
+          },
         })}
         error={errors.password?.message}
       />
@@ -59,15 +72,15 @@ export function RegisterForm({ onSuccess }) {
       <Input
         label="Confirm Password"
         type="password"
-        {...register('password_confirm', {
-          required: 'Please confirm your password',
-          validate: (value) => value === password || 'Passwords do not match',
+        {...register("password_confirm", {
+          required: "Please confirm your password",
+          validate: (value) => value === password || "Passwords do not match",
         })}
         error={errors.password_confirm?.message}
       />
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? 'Creating account...' : 'Create Account'}
+        {isSubmitting ? "Creating account..." : "Create Account"}
       </Button>
     </form>
   );

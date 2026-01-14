@@ -1,13 +1,18 @@
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { usersApi } from '../api/users';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
+import { usersApi } from "../api/users";
 
 export const userKeys = {
-  all: ['users'],
-  details: () => [...userKeys.all, 'detail'],
+  all: ["users"],
+  details: () => [...userKeys.all, "detail"],
   detail: (id) => [...userKeys.details(), id],
-  recipes: (id) => [...userKeys.detail(id), 'recipes'],
-  followers: (id) => [...userKeys.detail(id), 'followers'],
-  following: (id) => [...userKeys.detail(id), 'following'],
+  recipes: (id) => [...userKeys.detail(id), "recipes"],
+  followers: (id) => [...userKeys.detail(id), "followers"],
+  following: (id) => [...userKeys.detail(id), "following"],
 };
 
 export function useUser(id) {
@@ -36,7 +41,7 @@ export function useFollowers(userId) {
       if (lastPage.next) {
         try {
           const url = new URL(lastPage.next);
-          return url.searchParams.get('page');
+          return url.searchParams.get("page");
         } catch {
           return undefined;
         }
@@ -56,7 +61,7 @@ export function useFollowing(userId) {
       if (lastPage.next) {
         try {
           const url = new URL(lastPage.next);
-          return url.searchParams.get('page');
+          return url.searchParams.get("page");
         } catch {
           return undefined;
         }

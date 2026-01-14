@@ -1,7 +1,7 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useRecipe, useUpdateRecipe } from '../hooks/useRecipes';
-import { RecipeForm } from '../features/recipes/RecipeForm';
-import { Spinner } from '../components/ui';
+import { useParams, useNavigate } from "react-router-dom";
+import { useRecipe, useUpdateRecipe } from "../hooks/useRecipes";
+import { RecipeForm } from "../features/recipes/RecipeForm";
+import { Spinner } from "../components/ui";
 
 export function EditRecipePage() {
   const { id } = useParams();
@@ -14,7 +14,7 @@ export function EditRecipePage() {
       await updateRecipe.mutateAsync({ id, data });
       navigate(`/recipes/${id}`);
     } catch (error) {
-      console.error('Failed to update recipe:', error);
+      console.error("Failed to update recipe:", error);
     }
   };
 

@@ -1,23 +1,23 @@
-import { Button, Input } from '../../components/ui';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Button, Input } from "../../components/ui";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 const unitOptions = [
-  { value: 'cups', label: 'Cups' },
-  { value: 'tbsp', label: 'Tablespoons' },
-  { value: 'tsp', label: 'Teaspoons' },
-  { value: 'oz', label: 'Ounces' },
-  { value: 'g', label: 'Grams' },
-  { value: 'kg', label: 'Kilograms' },
-  { value: 'ml', label: 'Milliliters' },
-  { value: 'l', label: 'Liters' },
-  { value: 'pieces', label: 'Pieces' },
-  { value: 'pinch', label: 'Pinch' },
-  { value: 'to taste', label: 'To Taste' },
+  { value: "cups", label: "Cups" },
+  { value: "tbsp", label: "Tablespoons" },
+  { value: "tsp", label: "Teaspoons" },
+  { value: "oz", label: "Ounces" },
+  { value: "g", label: "Grams" },
+  { value: "kg", label: "Kilograms" },
+  { value: "ml", label: "Milliliters" },
+  { value: "l", label: "Liters" },
+  { value: "pieces", label: "Pieces" },
+  { value: "pinch", label: "Pinch" },
+  { value: "to taste", label: "To Taste" },
 ];
 
 export function IngredientForm({ ingredients, onChange }) {
   const handleAdd = () => {
-    onChange([...ingredients, { name: '', quantity: '', unit: 'pieces' }]);
+    onChange([...ingredients, { name: "", quantity: "", unit: "pieces" }]);
   };
 
   const handleRemove = (index) => {
@@ -26,7 +26,7 @@ export function IngredientForm({ ingredients, onChange }) {
 
   const handleChange = (index, field, value) => {
     const updated = ingredients.map((ing, i) =>
-      i === index ? { ...ing, [field]: value } : ing
+      i === index ? { ...ing, [field]: value } : ing,
     );
     onChange(updated);
   };
@@ -39,7 +39,7 @@ export function IngredientForm({ ingredients, onChange }) {
             <Input
               placeholder="Ingredient name"
               value={ing.name}
-              onChange={(e) => handleChange(index, 'name', e.target.value)}
+              onChange={(e) => handleChange(index, "name", e.target.value)}
             />
           </div>
           <div className="w-24">
@@ -48,13 +48,13 @@ export function IngredientForm({ ingredients, onChange }) {
               step="0.1"
               placeholder="Qty"
               value={ing.quantity}
-              onChange={(e) => handleChange(index, 'quantity', e.target.value)}
+              onChange={(e) => handleChange(index, "quantity", e.target.value)}
             />
           </div>
           <div className="w-32">
             <select
               value={ing.unit}
-              onChange={(e) => handleChange(index, 'unit', e.target.value)}
+              onChange={(e) => handleChange(index, "unit", e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               {unitOptions.map((opt) => (

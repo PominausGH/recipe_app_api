@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { StarIcon } from '@heroicons/react/24/solid';
-import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
+import { useState } from "react";
+import { StarIcon } from "@heroicons/react/24/solid";
+import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
 
 export function RatingStars({
   rating = 0,
   count,
   interactive = false,
   onRate,
-  size = 'md',
+  size = "md",
 }) {
   const [hoverRating, setHoverRating] = useState(0);
 
   const sizes = {
-    sm: 'h-4 w-4',
-    md: 'h-5 w-5',
-    lg: 'h-6 w-6',
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
   };
 
   const handleClick = (star) => {
@@ -39,7 +39,7 @@ export function RatingStars({
               onClick={() => handleClick(star)}
               onMouseEnter={() => interactive && setHoverRating(star)}
               onMouseLeave={() => interactive && setHoverRating(0)}
-              className={`${interactive ? 'cursor-pointer' : 'cursor-default'}`}
+              className={`${interactive ? "cursor-pointer" : "cursor-default"}`}
             >
               {filled ? (
                 <StarIcon className={`${sizes[size]} text-yellow-400`} />

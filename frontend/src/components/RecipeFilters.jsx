@@ -1,17 +1,17 @@
-import { Input, Button } from './ui';
+import { Input, Button } from "./ui";
 
 const difficulties = [
-  { value: '', label: 'All Difficulties' },
-  { value: 'easy', label: 'Easy' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'hard', label: 'Hard' },
+  { value: "", label: "All Difficulties" },
+  { value: "easy", label: "Easy" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Hard" },
 ];
 
 const sortOptions = [
-  { value: '-created_at', label: 'Newest First' },
-  { value: 'created_at', label: 'Oldest First' },
-  { value: '-avg_rating', label: 'Highest Rated' },
-  { value: 'prep_time', label: 'Quickest' },
+  { value: "-created_at", label: "Newest First" },
+  { value: "created_at", label: "Oldest First" },
+  { value: "-avg_rating", label: "Highest Rated" },
+  { value: "prep_time", label: "Quickest" },
 ];
 
 export function RecipeFilters({ filters, onChange, onClear }) {
@@ -28,8 +28,8 @@ export function RecipeFilters({ filters, onChange, onClear }) {
         <Input
           type="text"
           placeholder="Search recipes..."
-          value={filters.search || ''}
-          onChange={(e) => handleChange('search', e.target.value)}
+          value={filters.search || ""}
+          onChange={(e) => handleChange("search", e.target.value)}
         />
       </div>
 
@@ -38,8 +38,8 @@ export function RecipeFilters({ filters, onChange, onClear }) {
           Difficulty
         </label>
         <select
-          value={filters.difficulty || ''}
-          onChange={(e) => handleChange('difficulty', e.target.value)}
+          value={filters.difficulty || ""}
+          onChange={(e) => handleChange("difficulty", e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         >
           {difficulties.map((d) => (
@@ -57,8 +57,8 @@ export function RecipeFilters({ filters, onChange, onClear }) {
         <Input
           type="number"
           placeholder="e.g., 30"
-          value={filters.max_time || ''}
-          onChange={(e) => handleChange('max_time', e.target.value)}
+          value={filters.max_time || ""}
+          onChange={(e) => handleChange("max_time", e.target.value)}
         />
       </div>
 
@@ -67,8 +67,8 @@ export function RecipeFilters({ filters, onChange, onClear }) {
           Sort By
         </label>
         <select
-          value={filters.ordering || '-created_at'}
-          onChange={(e) => handleChange('ordering', e.target.value)}
+          value={filters.ordering || "-created_at"}
+          onChange={(e) => handleChange("ordering", e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         >
           {sortOptions.map((s) => (

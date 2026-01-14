@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useFollowers, useFollowing } from '../hooks/useUsers';
-import { useAuth } from '../hooks/useAuth';
-import { UserLink } from './UserLink';
-import { FollowButton } from './FollowButton';
-import { Spinner } from './ui';
+import { useEffect, useRef } from "react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useFollowers, useFollowing } from "../hooks/useUsers";
+import { useAuth } from "../hooks/useAuth";
+import { UserLink } from "./UserLink";
+import { FollowButton } from "./FollowButton";
+import { Spinner } from "./ui";
 
 export function FollowersModal({ userId, type, isOpen, onClose }) {
   const { user: currentUser } = useAuth();
@@ -12,29 +12,24 @@ export function FollowersModal({ userId, type, isOpen, onClose }) {
   const listRef = useRef(null);
 
   // Call both hooks unconditionally to comply with Rules of Hooks
-  const followers = useFollowers(type === 'followers' ? userId : null);
-  const following = useFollowing(type === 'following' ? userId : null);
+  const followers = useFollowers(type === "followers" ? userId : null);
+  const following = useFollowing(type === "following" ? userId : null);
 
-  const {
-    data,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = type === 'followers' ? followers : following;
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    type === "followers" ? followers : following;
 
   // Close on escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
     };
   }, [isOpen, onClose]);
 
@@ -55,7 +50,7 @@ export function FollowersModal({ userId, type, isOpen, onClose }) {
   if (!isOpen) return null;
 
   const users = data?.pages?.flatMap((page) => page.results) || [];
-  const title = type === 'followers' ? 'Followers' : 'Following';
+  const title = type === "followers" ? "Followers" : "Following";
 
   return (
     <div
@@ -69,7 +64,9 @@ export function FollowersModal({ userId, type, isOpen, onClose }) {
       <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 id="modal-title" className="text-lg font-semibold">{title}</h2>
+          <h2 id="modal-title" className="text-lg font-semibold">
+            {title}
+          </h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full"
@@ -91,22 +88,30 @@ export function FollowersModal({ userId, type, isOpen, onClose }) {
             </div>
           ) : users.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
-              {type === 'followers' ? 'No followers yet' : 'Not following anyone'}
+              {type === "followers"
+                ? "No followers yet"
+                : "Not following anyone"}
             </p>
           ) : (
             <div className="space-y-3">
               {users.map((item) => {
-                const user = type === 'followers' ? item.follower : item.following;
+                const user =
+                  type === "followers" ? item.follower : item.following;
                 const isCurrentUser = currentUser?.id === user.id;
 
                 return (
-                  <div key={user.id} className="flex items-center justify-between">
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between"
+                  >
                     <UserLink user={user} size="md" />
                     {!isCurrentUser && (
                       <FollowButton
                         userId={user.id}
                         isPrivate={user.is_private}
-                        initialState={user.is_following ? 'following' : 'not_following'}
+                        initialState={
+                          user.is_following ? "following" : "not_following"
+                        }
                       />
                     )}
                   </div>

@@ -1,6 +1,6 @@
-import { useRecipes } from '../hooks/useRecipes';
-import { RecipeCard } from '../components/RecipeCard';
-import { Spinner } from '../components/ui';
+import { useRecipes } from "../hooks/useRecipes";
+import { RecipeCard } from "../components/RecipeCard";
+import { Spinner } from "../components/ui";
 
 export function FavoritesPage() {
   // Note: Backend needs to support favorites filter - this assumes it does
@@ -16,7 +16,8 @@ export function FavoritesPage() {
         </div>
       ) : !data?.results?.length ? (
         <div className="text-center py-12 text-gray-500">
-          No favorite recipes yet. Browse recipes and click the heart to save them!
+          No favorite recipes yet. Browse recipes and click the heart to save
+          them!
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

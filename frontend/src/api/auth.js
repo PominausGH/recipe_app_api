@@ -1,16 +1,16 @@
-import client, { setAccessToken, clearTokens } from './client';
+import client, { setAccessToken, clearTokens } from "./client";
 
 export const authApi = {
   async login(email, password) {
-    const response = await client.post('/auth/login/', { email, password });
+    const response = await client.post("/auth/login/", { email, password });
     const { access, refresh } = response.data;
     setAccessToken(access);
-    localStorage.setItem('refreshToken', refresh);
+    localStorage.setItem("refreshToken", refresh);
     return response.data;
   },
 
   async register(email, name, password, password_confirm) {
-    const response = await client.post('/auth/register/', {
+    const response = await client.post("/auth/register/", {
       email,
       name,
       password,
@@ -20,10 +20,10 @@ export const authApi = {
   },
 
   async logout() {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = localStorage.getItem("refreshToken");
     if (refreshToken) {
       try {
-        await client.post('/auth/logout/', { refresh: refreshToken });
+        await client.post("/auth/logout/", { refresh: refreshToken });
       } catch {
         // Ignore logout errors
       }
@@ -32,20 +32,20 @@ export const authApi = {
   },
 
   async getMe() {
-    const response = await client.get('/auth/me/');
+    const response = await client.get("/auth/me/");
     return response.data;
   },
 
   async updateMe(data) {
-    const response = await client.patch('/auth/me/', data);
+    const response = await client.patch("/auth/me/", data);
     return response.data;
   },
 
   async updateProfilePhoto(file) {
     const formData = new FormData();
-    formData.append('profile_photo', file);
-    const response = await client.patch('/auth/me/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+    formData.append("profile_photo", file);
+    const response = await client.patch("/auth/me/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data;
   },

@@ -1,26 +1,26 @@
-import { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { authApi } from '../api/auth';
-import { Button, Input, Card, Spinner } from '../components/ui';
-import { ImageUpload } from '../components/ImageUpload';
+import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { authApi } from "../api/auth";
+import { Button, Input, Card, Spinner } from "../components/ui";
+import { ImageUpload } from "../components/ImageUpload";
 
 export function ProfilePage() {
   const { user, updateProfile, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(user?.name || '');
-  const [bio, setBio] = useState(user?.bio || '');
+  const [name, setName] = useState(user?.name || "");
+  const [bio, setBio] = useState(user?.bio || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
+    setError("");
     try {
       await updateProfile({ name, bio });
       setIsEditing(false);
     } catch {
-      setError('Failed to update profile.');
+      setError("Failed to update profile.");
     } finally {
       setIsSubmitting(false);
     }
@@ -32,7 +32,7 @@ export function ProfilePage() {
       await authApi.updateProfilePhoto(file);
       await refreshUser();
     } catch {
-      setError('Failed to upload photo.');
+      setError("Failed to upload photo.");
     }
   };
 
@@ -65,7 +65,7 @@ export function ProfilePage() {
               />
             ) : (
               <div className="w-24 h-24 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 text-3xl font-bold">
-                {user.name?.[0]?.toUpperCase() || '?'}
+                {user.name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
           </div>
@@ -119,15 +119,15 @@ export function ProfilePage() {
               </div>
               <div className="flex gap-2">
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving...' : 'Save'}
+                  {isSubmitting ? "Saving..." : "Save"}
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={() => {
                     setIsEditing(false);
-                    setName(user.name || '');
-                    setBio(user.bio || '');
+                    setName(user.name || "");
+                    setBio(user.bio || "");
                   }}
                 >
                   Cancel
@@ -138,11 +138,11 @@ export function ProfilePage() {
             <div className="space-y-4">
               <div>
                 <span className="text-sm text-gray-500">Name</span>
-                <p>{user.name || 'Not set'}</p>
+                <p>{user.name || "Not set"}</p>
               </div>
               <div>
                 <span className="text-sm text-gray-500">Bio</span>
-                <p>{user.bio || 'No bio yet'}</p>
+                <p>{user.bio || "No bio yet"}</p>
               </div>
             </div>
           )}

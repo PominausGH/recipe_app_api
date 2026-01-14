@@ -29,3 +29,20 @@ repos:
         files: ^app/
         exclude: /(migrations|tests)/
         args: ['--config-file=mypy.ini']
+
+  # Frontend hooks
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        files: ^frontend/
+        exclude: (dist|node_modules)/
+
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: bash -c 'cd frontend && npm run lint'
+        language: system
+        files: ^frontend/src/.*\.[jt]sx?$
+        pass_filenames: false

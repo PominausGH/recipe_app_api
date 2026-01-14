@@ -1,20 +1,20 @@
-import { useCallback, useState } from 'react';
-import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useCallback, useState } from "react";
+import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
-export function ImageUpload({ value, onChange, className = '' }) {
+export function ImageUpload({ value, onChange, className = "" }) {
   const [preview, setPreview] = useState(value);
   const [dragActive, setDragActive] = useState(false);
 
   const handleFile = useCallback(
     (file) => {
-      if (file && file.type.startsWith('image/')) {
+      if (file && file.type.startsWith("image/")) {
         onChange(file);
         const reader = new FileReader();
         reader.onloadend = () => setPreview(reader.result);
         reader.readAsDataURL(file);
       }
     },
-    [onChange]
+    [onChange],
   );
 
   const handleDrop = useCallback(
@@ -24,7 +24,7 @@ export function ImageUpload({ value, onChange, className = '' }) {
       const file = e.dataTransfer.files[0];
       handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   const handleChange = (e) => {
@@ -65,7 +65,7 @@ export function ImageUpload({ value, onChange, className = '' }) {
           className={`
             border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
             transition-colors duration-200
-            ${dragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400'}
+            ${dragActive ? "border-primary-500 bg-primary-50" : "border-gray-300 hover:border-gray-400"}
           `}
         >
           <input

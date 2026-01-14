@@ -1,8 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { Button } from './ui';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { Button } from "./ui";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -11,7 +11,7 @@ export function Navbar() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -23,18 +23,30 @@ export function Navbar() {
               RecipeApp
             </Link>
             <div className="hidden md:flex ml-10 space-x-4">
-              <Link to="/recipes" className="text-gray-700 hover:text-primary-600 px-3 py-2">
+              <Link
+                to="/recipes"
+                className="text-gray-700 hover:text-primary-600 px-3 py-2"
+              >
                 Browse Recipes
               </Link>
               {isAuthenticated && (
                 <>
-                  <Link to="/recipes/new" className="text-gray-700 hover:text-primary-600 px-3 py-2">
+                  <Link
+                    to="/recipes/new"
+                    className="text-gray-700 hover:text-primary-600 px-3 py-2"
+                  >
                     Create Recipe
                   </Link>
-                  <Link to="/my-recipes" className="text-gray-700 hover:text-primary-600 px-3 py-2">
+                  <Link
+                    to="/my-recipes"
+                    className="text-gray-700 hover:text-primary-600 px-3 py-2"
+                  >
                     My Recipes
                   </Link>
-                  <Link to="/favorites" className="text-gray-700 hover:text-primary-600 px-3 py-2">
+                  <Link
+                    to="/favorites"
+                    className="text-gray-700 hover:text-primary-600 px-3 py-2"
+                  >
                     Favorites
                   </Link>
                 </>
@@ -45,8 +57,11 @@ export function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <Link to="/profile" className="text-gray-700 hover:text-primary-600">
-                  {user?.name || 'Profile'}
+                <Link
+                  to="/profile"
+                  className="text-gray-700 hover:text-primary-600"
+                >
+                  {user?.name || "Profile"}
                 </Link>
                 <Button variant="ghost" onClick={handleLogout}>
                   Logout
@@ -87,10 +102,16 @@ export function Navbar() {
             </Link>
             {isAuthenticated ? (
               <>
-                <Link to="/recipes/new" className="block px-3 py-2 text-gray-700">
+                <Link
+                  to="/recipes/new"
+                  className="block px-3 py-2 text-gray-700"
+                >
                   Create Recipe
                 </Link>
-                <Link to="/my-recipes" className="block px-3 py-2 text-gray-700">
+                <Link
+                  to="/my-recipes"
+                  className="block px-3 py-2 text-gray-700"
+                >
                   My Recipes
                 </Link>
                 <Link to="/favorites" className="block px-3 py-2 text-gray-700">
@@ -99,7 +120,10 @@ export function Navbar() {
                 <Link to="/profile" className="block px-3 py-2 text-gray-700">
                   Profile
                 </Link>
-                <button onClick={handleLogout} className="block px-3 py-2 text-gray-700">
+                <button
+                  onClick={handleLogout}
+                  className="block px-3 py-2 text-gray-700"
+                >
                   Logout
                 </button>
               </>

@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { CheckBadgeIcon } from '@heroicons/react/24/solid';
-import { useUser, useUserRecipes } from '../hooks/useUsers';
-import { useAuth } from '../hooks/useAuth';
-import { FollowButton } from '../components/FollowButton';
-import { FollowersModal } from '../components/FollowersModal';
-import { RecipeCard } from '../components/RecipeCard';
-import { Card, Button, Spinner } from '../components/ui';
+import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { CheckBadgeIcon } from "@heroicons/react/24/solid";
+import { useUser, useUserRecipes } from "../hooks/useUsers";
+import { useAuth } from "../hooks/useAuth";
+import { FollowButton } from "../components/FollowButton";
+import { FollowersModal } from "../components/FollowersModal";
+import { RecipeCard } from "../components/RecipeCard";
+import { Card, Button, Spinner } from "../components/ui";
 
 export function UserProfilePage() {
   const { id } = useParams();
@@ -28,8 +28,12 @@ export function UserProfilePage() {
   if (error || !user) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">User Not Found</h2>
-        <p className="text-gray-600 mb-4">This user doesn't exist or has been removed.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          User Not Found
+        </h2>
+        <p className="text-gray-600 mb-4">
+          This user doesn't exist or has been removed.
+        </p>
         <Link to="/">
           <Button>Go Home</Button>
         </Link>
@@ -38,9 +42,9 @@ export function UserProfilePage() {
   }
 
   const getInitialFollowState = () => {
-    if (user.is_following) return 'following';
-    if (user.has_pending_request) return 'requested';
-    return 'not_following';
+    if (user.is_following) return "following";
+    if (user.has_pending_request) return "requested";
+    return "not_following";
   };
 
   return (
@@ -58,7 +62,7 @@ export function UserProfilePage() {
               />
             ) : (
               <div className="w-24 h-24 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 text-3xl font-bold">
-                {user.name?.[0]?.toUpperCase() || '?'}
+                {user.name?.[0]?.toUpperCase() || "?"}
               </div>
             )}
           </div>
@@ -69,34 +73,39 @@ export function UserProfilePage() {
               <h1 className="text-2xl font-bold truncate">{user.name}</h1>
               {user.is_verified && (
                 <>
-                  <CheckBadgeIcon className="h-6 w-6 text-primary-500 flex-shrink-0" aria-hidden="true" />
+                  <CheckBadgeIcon
+                    className="h-6 w-6 text-primary-500 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span className="sr-only">Verified account</span>
                 </>
               )}
             </div>
 
-            {user.bio && (
-              <p className="text-gray-600 mb-3">{user.bio}</p>
-            )}
+            {user.bio && <p className="text-gray-600 mb-3">{user.bio}</p>}
 
             {/* Stats */}
             <div className="flex items-center gap-4 text-sm">
               <button
                 type="button"
-                onClick={() => setModalType('followers')}
+                onClick={() => setModalType("followers")}
                 className="hover:underline"
                 aria-label={`${user.followers_count || 0} followers, click to view`}
               >
-                <span className="font-semibold">{user.followers_count || 0}</span>{' '}
+                <span className="font-semibold">
+                  {user.followers_count || 0}
+                </span>{" "}
                 <span className="text-gray-600">followers</span>
               </button>
               <button
                 type="button"
-                onClick={() => setModalType('following')}
+                onClick={() => setModalType("following")}
                 className="hover:underline"
                 aria-label={`${user.following_count || 0} following, click to view`}
               >
-                <span className="font-semibold">{user.following_count || 0}</span>{' '}
+                <span className="font-semibold">
+                  {user.following_count || 0}
+                </span>{" "}
                 <span className="text-gray-600">following</span>
               </button>
             </div>
@@ -124,7 +133,9 @@ export function UserProfilePage() {
         <Card className="mb-6">
           <Card.Body className="text-center py-8">
             <p className="text-gray-600">This account is private.</p>
-            <p className="text-gray-500 text-sm">Follow to see their recipes.</p>
+            <p className="text-gray-500 text-sm">
+              Follow to see their recipes.
+            </p>
           </Card.Body>
         </Card>
       )}

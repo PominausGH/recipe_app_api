@@ -35,7 +35,7 @@ export interface Recipe {
   prep_time?: number;
   cook_time?: number;
   servings?: number;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: "easy" | "medium" | "hard";
   image?: string;
   is_published: boolean;
   created_at: string;
@@ -80,7 +80,7 @@ export interface Comment {
   created_at: string;
 }
 
-export type FollowState = 'not_following' | 'following' | 'requested';
+export type FollowState = "not_following" | "following" | "requested";
 
 // API response types
 export interface PaginatedResponse<T> {
@@ -116,8 +116,8 @@ export interface RecipeFormData {
   prep_time?: number;
   cook_time?: number;
   servings?: number;
-  difficulty?: 'easy' | 'medium' | 'hard';
-  ingredients?: Omit<Ingredient, 'id'>[];
+  difficulty?: "easy" | "medium" | "hard";
+  ingredients?: Omit<Ingredient, "id">[];
   categories?: number[];
   tags?: number[];
 }

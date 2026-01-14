@@ -1,20 +1,24 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useAuth } from '../../hooks/useAuth';
-import { Button, Input } from '../../components/ui';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useAuth } from "../../hooks/useAuth";
+import { Button, Input } from "../../components/ui";
 
 export function LoginForm({ onSuccess }) {
   const { login } = useAuth();
-  const [error, setError] = useState('');
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
+  const [error, setError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm();
 
   const onSubmit = async (data) => {
     try {
-      setError('');
+      setError("");
       await login(data.email, data.password);
       onSuccess?.();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed. Please try again.');
+      setError(err.response?.data?.detail || "Login failed. Please try again.");
     }
   };
 
@@ -29,19 +33,19 @@ export function LoginForm({ onSuccess }) {
       <Input
         label="Email"
         type="email"
-        {...register('email', { required: 'Email is required' })}
+        {...register("email", { required: "Email is required" })}
         error={errors.email?.message}
       />
 
       <Input
         label="Password"
         type="password"
-        {...register('password', { required: 'Password is required' })}
+        {...register("password", { required: "Password is required" })}
         error={errors.password?.message}
       />
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? 'Signing in...' : 'Sign In'}
+        {isSubmitting ? "Signing in..." : "Sign In"}
       </Button>
     </form>
   );

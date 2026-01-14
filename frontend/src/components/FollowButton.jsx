@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useFollowUser } from '../hooks/useUsers';
-import { useAuth } from '../hooks/useAuth';
-import { Button } from './ui';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useFollowUser } from "../hooks/useUsers";
+import { useAuth } from "../hooks/useAuth";
+import { Button } from "./ui";
 
-export function FollowButton({ userId, isPrivate, initialState = 'not_following', onStateChange }) {
+export function FollowButton({
+  userId,
+  isPrivate,
+  initialState = "not_following",
+  onStateChange,
+}) {
   const [followState, setFollowState] = useState(initialState);
   const [isHovering, setIsHovering] = useState(false);
   const [error, setError] = useState(null);
@@ -18,7 +23,7 @@ export function FollowButton({ userId, isPrivate, initialState = 'not_following'
 
   const handleClick = async () => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
@@ -26,40 +31,43 @@ export function FollowButton({ userId, isPrivate, initialState = 'not_following'
       const result = await followMutation.mutateAsync(userId);
 
       let newState;
-      if (result.status === 'removed from followers' || result.status === 'unfollowed') {
-        newState = 'not_following';
-      } else if (result.status === 'pending') {
-        newState = 'requested';
+      if (
+        result.status === "removed from followers" ||
+        result.status === "unfollowed"
+      ) {
+        newState = "not_following";
+      } else if (result.status === "pending") {
+        newState = "requested";
       } else {
-        newState = 'following';
+        newState = "following";
       }
 
       setFollowState(newState);
       onStateChange?.(newState);
     } catch (err) {
-      console.error('Follow action failed:', err);
-      setError('Failed. Try again.');
+      console.error("Follow action failed:", err);
+      setError("Failed. Try again.");
       setTimeout(() => setError(null), 3000);
     }
   };
 
   const getButtonProps = () => {
     switch (followState) {
-      case 'following':
+      case "following":
         return {
-          variant: isHovering ? 'danger' : 'secondary',
-          children: isHovering ? 'Unfollow' : 'Following',
+          variant: isHovering ? "danger" : "secondary",
+          children: isHovering ? "Unfollow" : "Following",
         };
-      case 'requested':
+      case "requested":
         return {
-          variant: 'secondary',
-          children: 'Requested',
+          variant: "secondary",
+          children: "Requested",
         };
-      case 'not_following':
+      case "not_following":
       default:
         return {
-          variant: 'primary',
-          children: isPrivate ? 'Request' : 'Follow',
+          variant: "primary",
+          children: isPrivate ? "Request" : "Follow",
         };
     }
   };
@@ -75,7 +83,11 @@ export function FollowButton({ userId, isPrivate, initialState = 'not_following'
       variant={buttonProps.variant}
       size="sm"
     >
-      {error ? error : (followMutation.isPending ? 'Loading...' : buttonProps.children)}
+      {error
+        ? error
+        : followMutation.isPending
+          ? "Loading..."
+          : buttonProps.children}
     </Button>
   );
 }

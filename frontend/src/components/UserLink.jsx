@@ -1,28 +1,33 @@
-import { Link } from 'react-router-dom';
-import { CheckBadgeIcon } from '@heroicons/react/24/solid';
+import { Link } from "react-router-dom";
+import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 
 const sizes = {
   sm: {
-    photo: 'w-6 h-6',
-    text: 'text-sm',
-    badge: 'h-3 w-3',
+    photo: "w-6 h-6",
+    text: "text-sm",
+    badge: "h-3 w-3",
   },
   md: {
-    photo: 'w-8 h-8',
-    text: 'text-base',
-    badge: 'h-4 w-4',
+    photo: "w-8 h-8",
+    text: "text-base",
+    badge: "h-4 w-4",
   },
 };
 
-export function UserLink({ user, showPhoto = true, size = 'sm', disableLink = false }) {
+export function UserLink({
+  user,
+  showPhoto = true,
+  size = "sm",
+  disableLink = false,
+}) {
   if (!user) return null;
 
   const sizeClasses = sizes[size] || sizes.sm;
 
   const content = (
     <>
-      {showPhoto && (
-        user.profile_photo ? (
+      {showPhoto &&
+        (user.profile_photo ? (
           <img
             src={user.profile_photo}
             alt={user.name}
@@ -32,14 +37,13 @@ export function UserLink({ user, showPhoto = true, size = 'sm', disableLink = fa
           <div
             className={`${sizeClasses.photo} rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-medium text-xs`}
             role="img"
-            aria-label={user.name || 'Unknown user'}
+            aria-label={user.name || "Unknown user"}
           >
-            {user.name?.[0]?.toUpperCase() || '?'}
+            {user.name?.[0]?.toUpperCase() || "?"}
           </div>
-        )
-      )}
+        ))}
       <span className={`font-medium text-gray-900 ${sizeClasses.text}`}>
-        {user.name || 'Unknown'}
+        {user.name || "Unknown"}
       </span>
       {user.is_verified && (
         <>
@@ -54,11 +58,7 @@ export function UserLink({ user, showPhoto = true, size = 'sm', disableLink = fa
   );
 
   if (disableLink) {
-    return (
-      <span className="inline-flex items-center gap-1.5">
-        {content}
-      </span>
-    );
+    return <span className="inline-flex items-center gap-1.5">{content}</span>;
   }
 
   return (

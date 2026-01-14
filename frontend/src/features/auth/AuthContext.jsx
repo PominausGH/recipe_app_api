@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { authApi } from '../../api/auth';
-import { AuthContext } from './authContext';
+import { useState, useEffect, useCallback } from "react";
+import { authApi } from "../../api/auth";
+import { AuthContext } from "./authContext";
 
 export { AuthContext };
 
@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      const refreshToken = localStorage.getItem('refreshToken');
+      const refreshToken = localStorage.getItem("refreshToken");
       if (refreshToken) {
         await fetchUser();
       }

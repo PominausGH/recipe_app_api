@@ -1,4 +1,4 @@
-import client from './client';
+import client from "./client";
 
 export const usersApi = {
   async get(id) {
@@ -7,7 +7,7 @@ export const usersApi = {
   },
 
   async getRecipes(userId, params = {}) {
-    const response = await client.get('/recipes/', {
+    const response = await client.get("/recipes/", {
       params: { ...params, author: userId },
     });
     return response.data;
@@ -19,16 +19,22 @@ export const usersApi = {
   },
 
   async getFollowers(userId, page = 1) {
-    const response = await client.get(`/interaction/users/${userId}/followers/`, {
-      params: { page },
-    });
+    const response = await client.get(
+      `/interaction/users/${userId}/followers/`,
+      {
+        params: { page },
+      },
+    );
     return response.data;
   },
 
   async getFollowing(userId, page = 1) {
-    const response = await client.get(`/interaction/users/${userId}/following/`, {
-      params: { page },
-    });
+    const response = await client.get(
+      `/interaction/users/${userId}/following/`,
+      {
+        params: { page },
+      },
+    );
     return response.data;
   },
 };
