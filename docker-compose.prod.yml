@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        - DEV=false
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      - DJANGO_SETTINGS_MODULE=app.settings.prod
+    volumes:
+      - static_data:/app/static
+      - media_data:/app/media
+    depends_on:
+      - db
+    command: >
+      sh -c "python manage.py wait_for_db &&
+            python manage.py migrate &&
+            python manage.py collectstatic --noinput &&
+            gunicorn app.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+
+  db:
+    image: postgres:13-alpine
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - static_data:/app/static:ro
+      - media_data:/app/media:ro
+    depends_on:
+      - app
+
+volumes:
+  postgres_data:
+  static_data:
+  media_data:

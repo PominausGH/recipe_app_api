@@ -53,3 +53,6 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "Recipe App <noreply@example.com>"
 )
+
+# Frontend URL for email links
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://localhost")
