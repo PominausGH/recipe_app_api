@@ -1,6 +1,7 @@
-
-# CI-specific override - don't mount app directory to preserve
-# media/static directories created in Dockerfile
+# CI-specific override
 services:
   app:
+    # Don't mount volumes to preserve directories from Dockerfile
     volumes: []
+    # Run as root to avoid permission issues in CI
+    user: root
