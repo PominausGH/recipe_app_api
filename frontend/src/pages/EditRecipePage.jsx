@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useRecipe, useUpdateRecipe } from "../hooks/useRecipes";
 import { RecipeForm } from "../features/recipes/RecipeForm";
@@ -8,13 +9,20 @@ export function EditRecipePage() {
   const navigate = useNavigate();
   const { data: recipe, isLoading } = useRecipe(id);
   const updateRecipe = useUpdateRecipe();
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (data) => {
     try {
+      setError(null);
       await updateRecipe.mutateAsync({ id, data });
       navigate(`/recipes/${id}`);
-    } catch (error) {
-      console.error("Failed to update recipe:", error);
+    } catch (err) {
+      const message =
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        "Failed to update recipe. Please try again.";
+      setError(message);
+      console.error("Failed to update recipe:", err);
     }
   };
 
@@ -33,6 +41,11 @@ export function EditRecipePage() {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold mb-8">Edit Recipe</h1>
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
       <RecipeForm
         initialData={recipe}
         onSubmit={handleSubmit}
