@@ -10,6 +10,7 @@ from core.serializers import UserRegistrationSerializer, UserProfileSerializer
 
 class RegisterView(generics.CreateAPIView):
     """View for user registration."""
+
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
@@ -17,6 +18,7 @@ class RegisterView(generics.CreateAPIView):
 
 class MeView(generics.RetrieveUpdateAPIView):
     """View for current user profile."""
+
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
@@ -27,21 +29,22 @@ class MeView(generics.RetrieveUpdateAPIView):
 
 class LogoutView(APIView):
     """View to blacklist refresh token on logout."""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         """Blacklist the refresh token."""
         try:
-            refresh_token = request.data.get('refresh')
+            refresh_token = request.data.get("refresh")
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
             return Response(
-                {'detail': 'Successfully logged out.'},
+                {"detail": "Successfully logged out."},
                 status=status.HTTP_200_OK,
             )
         except Exception:
             return Response(
-                {'detail': 'Invalid token.'},
+                {"detail": "Invalid token."},
                 status=status.HTTP_400_BAD_REQUEST,
             )

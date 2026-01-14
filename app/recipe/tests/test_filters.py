@@ -8,7 +8,7 @@ from taxonomy.models import Category, Tag
 from interaction.models import Rating
 
 
-RECIPES_URL = reverse('recipe:recipe-list')
+RECIPES_URL = reverse("recipe:recipe-list")
 
 
 class RecipeFilterTests(TestCase):
@@ -17,28 +17,26 @@ class RecipeFilterTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
 
         # Create categories
-        self.breakfast = Category.objects.create(
-            name='Breakfast', slug='breakfast'
-        )
-        self.dinner = Category.objects.create(name='Dinner', slug='dinner')
+        self.breakfast = Category.objects.create(name="Breakfast", slug="breakfast")
+        self.dinner = Category.objects.create(name="Dinner", slug="dinner")
 
         # Create tags
-        self.vegan = Tag.objects.create(name='Vegan', slug='vegan')
-        self.quick = Tag.objects.create(name='Quick', slug='quick')
+        self.vegan = Tag.objects.create(name="Vegan", slug="vegan")
+        self.quick = Tag.objects.create(name="Quick", slug="quick")
 
         # Create recipes
         self.recipe1 = Recipe.objects.create(
             author=self.user,
-            title='Pancakes',
-            description='Fluffy pancakes',
-            instructions='Mix and cook',
+            title="Pancakes",
+            description="Fluffy pancakes",
+            instructions="Mix and cook",
             category=self.breakfast,
-            difficulty='easy',
+            difficulty="easy",
             prep_time=10,
             cook_time=15,
             is_published=True,
@@ -47,11 +45,11 @@ class RecipeFilterTests(TestCase):
 
         self.recipe2 = Recipe.objects.create(
             author=self.user,
-            title='Vegan Stir Fry',
-            description='Healthy dinner',
-            instructions='Stir fry vegetables',
+            title="Vegan Stir Fry",
+            description="Healthy dinner",
+            instructions="Stir fry vegetables",
             category=self.dinner,
-            difficulty='medium',
+            difficulty="medium",
             prep_time=20,
             cook_time=30,
             is_published=True,
@@ -60,11 +58,11 @@ class RecipeFilterTests(TestCase):
 
         self.recipe3 = Recipe.objects.create(
             author=self.user,
-            title='Beef Wellington',
-            description='Fancy dinner',
-            instructions='Complex preparation',
+            title="Beef Wellington",
+            description="Fancy dinner",
+            instructions="Complex preparation",
             category=self.dinner,
-            difficulty='hard',
+            difficulty="hard",
             prep_time=60,
             cook_time=120,
             is_published=True,
@@ -72,45 +70,45 @@ class RecipeFilterTests(TestCase):
 
     def test_filter_by_category(self):
         """Test filtering recipes by category."""
-        res = self.client.get(RECIPES_URL, {'category': self.dinner.id})
+        res = self.client.get(RECIPES_URL, {"category": self.dinner.id})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['results']), 2)
+        self.assertEqual(len(res.data["results"]), 2)
 
     def test_filter_by_tags(self):
         """Test filtering recipes by tags."""
-        res = self.client.get(RECIPES_URL, {'tags': self.vegan.id})
+        res = self.client.get(RECIPES_URL, {"tags": self.vegan.id})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['results']), 1)
-        self.assertEqual(res.data['results'][0]['title'], 'Vegan Stir Fry')
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["title"], "Vegan Stir Fry")
 
     def test_filter_by_multiple_tags(self):
         """Test filtering by multiple tags."""
-        tag_ids = f'{self.vegan.id},{self.quick.id}'
-        res = self.client.get(RECIPES_URL, {'tags': tag_ids})
+        tag_ids = f"{self.vegan.id},{self.quick.id}"
+        res = self.client.get(RECIPES_URL, {"tags": tag_ids})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         # Should return recipes that have ANY of the tags
-        self.assertEqual(len(res.data['results']), 2)
+        self.assertEqual(len(res.data["results"]), 2)
 
     def test_filter_by_difficulty(self):
         """Test filtering recipes by difficulty."""
-        res = self.client.get(RECIPES_URL, {'difficulty': 'easy'})
+        res = self.client.get(RECIPES_URL, {"difficulty": "easy"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['results']), 1)
-        self.assertEqual(res.data['results'][0]['title'], 'Pancakes')
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["title"], "Pancakes")
 
     def test_filter_by_max_time(self):
         """Test filtering recipes by maximum total time."""
-        res = self.client.get(RECIPES_URL, {'max_time': 60})
+        res = self.client.get(RECIPES_URL, {"max_time": 60})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['results']), 2)
-        titles = [r['title'] for r in res.data['results']]
-        self.assertIn('Pancakes', titles)
-        self.assertIn('Vegan Stir Fry', titles)
+        self.assertEqual(len(res.data["results"]), 2)
+        titles = [r["title"] for r in res.data["results"]]
+        self.assertIn("Pancakes", titles)
+        self.assertIn("Vegan Stir Fry", titles)
 
 
 class RecipeSearchTests(TestCase):
@@ -119,54 +117,54 @@ class RecipeSearchTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
 
         Recipe.objects.create(
             author=self.user,
-            title='Chocolate Cake',
-            description='Rich chocolate dessert',
-            instructions='Bake',
+            title="Chocolate Cake",
+            description="Rich chocolate dessert",
+            instructions="Bake",
             is_published=True,
         )
         Recipe.objects.create(
             author=self.user,
-            title='Vanilla Cupcakes',
-            description='Light and fluffy',
-            instructions='Mix and bake',
+            title="Vanilla Cupcakes",
+            description="Light and fluffy",
+            instructions="Mix and bake",
             is_published=True,
         )
         Recipe.objects.create(
             author=self.user,
-            title='Grilled Chicken',
-            description='Healthy protein',
-            instructions='Grill',
+            title="Grilled Chicken",
+            description="Healthy protein",
+            instructions="Grill",
             is_published=True,
         )
 
     def test_search_by_title(self):
         """Test searching recipes by title."""
-        res = self.client.get(RECIPES_URL, {'search': 'chocolate'})
+        res = self.client.get(RECIPES_URL, {"search": "chocolate"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['results']), 1)
-        self.assertEqual(res.data['results'][0]['title'], 'Chocolate Cake')
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["title"], "Chocolate Cake")
 
     def test_search_by_description(self):
         """Test searching recipes by description."""
-        res = self.client.get(RECIPES_URL, {'search': 'fluffy'})
+        res = self.client.get(RECIPES_URL, {"search": "fluffy"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['results']), 1)
-        self.assertEqual(res.data['results'][0]['title'], 'Vanilla Cupcakes')
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["title"], "Vanilla Cupcakes")
 
     def test_search_case_insensitive(self):
         """Test search is case insensitive."""
-        res = self.client.get(RECIPES_URL, {'search': 'CHOCOLATE'})
+        res = self.client.get(RECIPES_URL, {"search": "CHOCOLATE"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['results']), 1)
+        self.assertEqual(len(res.data["results"]), 1)
 
 
 class RecipeOrderingTests(TestCase):
@@ -175,24 +173,24 @@ class RecipeOrderingTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
         self.user2 = get_user_model().objects.create_user(
-            email='user2@example.com',
-            password='testpass123',
+            email="user2@example.com",
+            password="testpass123",
         )
 
         self.recipe1 = Recipe.objects.create(
             author=self.user,
-            title='Recipe A',
-            instructions='Test',
+            title="Recipe A",
+            instructions="Test",
             is_published=True,
         )
         self.recipe2 = Recipe.objects.create(
             author=self.user,
-            title='Recipe B',
-            instructions='Test',
+            title="Recipe B",
+            instructions="Test",
             is_published=True,
         )
 
@@ -203,14 +201,14 @@ class RecipeOrderingTests(TestCase):
 
     def test_order_by_created_desc(self):
         """Test ordering by created date descending (default)."""
-        res = self.client.get(RECIPES_URL, {'ordering': '-created_at'})
+        res = self.client.get(RECIPES_URL, {"ordering": "-created_at"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data['results'][0]['title'], 'Recipe B')
+        self.assertEqual(res.data["results"][0]["title"], "Recipe B")
 
     def test_order_by_created_asc(self):
         """Test ordering by created date ascending."""
-        res = self.client.get(RECIPES_URL, {'ordering': 'created_at'})
+        res = self.client.get(RECIPES_URL, {"ordering": "created_at"})
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data['results'][0]['title'], 'Recipe A')
+        self.assertEqual(res.data["results"][0]["title"], "Recipe A")

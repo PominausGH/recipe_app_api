@@ -3,14 +3,12 @@ from rest_framework.routers import DefaultRouter
 from interaction import views
 
 router = DefaultRouter()
-router.register('users', views.UserViewSet, basename='user')
-router.register(
-    'notifications', views.NotificationViewSet, basename='notification'
-)
-router.register('feed', views.FeedViewSet, basename='feed')
+router.register("users", views.UserViewSet, basename="user")
+router.register("notifications", views.NotificationViewSet, basename="notification")
+router.register("feed", views.FeedViewSet, basename="feed")
 
-app_name = 'interaction'
+app_name = "interaction"
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

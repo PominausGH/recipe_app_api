@@ -1,3 +1,3 @@
 from .feed import FeedService
 
-__all__ = ['FeedService']
+__all__ = ["FeedService"]

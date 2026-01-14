@@ -5,22 +5,20 @@ from recipe.models import Recipe
 class RecipeFilter(filters.FilterSet):
     """FilterSet for Recipe model."""
 
-    category = filters.NumberFilter(field_name='category__id')
-    tags = filters.CharFilter(method='filter_tags')
-    difficulty = filters.CharFilter(field_name='difficulty')
-    max_time = filters.NumberFilter(method='filter_max_time')
-    author = filters.NumberFilter(field_name='author__id')
+    category = filters.NumberFilter(field_name="category__id")
+    tags = filters.CharFilter(method="filter_tags")
+    difficulty = filters.CharFilter(field_name="difficulty")
+    max_time = filters.NumberFilter(method="filter_max_time")
+    author = filters.NumberFilter(field_name="author__id")
 
     class Meta:
         model = Recipe
-        fields = ['category', 'tags', 'difficulty', 'author']
+        fields = ["category", "tags", "difficulty", "author"]
 
     def filter_tags(self, queryset, name, value):
         """Filter by tags (comma-separated IDs)."""
         if value:
-            tag_ids = [
-                int(id.strip()) for id in value.split(',') if id.strip()
-            ]
+            tag_ids = [int(id.strip()) for id in value.split(",") if id.strip()]
             if tag_ids:
                 return queryset.filter(tags__id__in=tag_ids).distinct()
         return queryset
@@ -35,8 +33,8 @@ class RecipeFilter(filters.FilterSet):
 
             return queryset.annotate(
                 _total_time_calc=(
-                    Coalesce(F('prep_time'), Value(0)) +
-                    Coalesce(F('cook_time'), Value(0))
+                    Coalesce(F("prep_time"), Value(0))
+                    + Coalesce(F("cook_time"), Value(0))
                 )
             ).filter(_total_time_calc__lte=value)
         return queryset

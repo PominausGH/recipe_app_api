@@ -7,8 +7,8 @@ class UserModelTests(TestCase):
 
     def test_create_user_with_email_successful(self):
         """Test creating a user with email is successful."""
-        email = 'test@example.com'
-        password = 'testpass123'
+        email = "test@example.com"
+        password = "testpass123"
         user = get_user_model().objects.create_user(
             email=email,
             password=password,
@@ -20,24 +20,24 @@ class UserModelTests(TestCase):
     def test_new_user_email_normalized(self):
         """Test email is normalized for new users."""
         sample_emails = [
-            ['test1@EXAMPLE.com', 'test1@example.com'],
-            ['Test2@Example.com', 'Test2@example.com'],
-            ['TEST3@EXAMPLE.COM', 'TEST3@example.com'],
+            ["test1@EXAMPLE.com", "test1@example.com"],
+            ["Test2@Example.com", "Test2@example.com"],
+            ["TEST3@EXAMPLE.COM", "TEST3@example.com"],
         ]
         for email, expected in sample_emails:
-            user = get_user_model().objects.create_user(email, 'sample123')
+            user = get_user_model().objects.create_user(email, "sample123")
             self.assertEqual(user.email, expected)
 
     def test_new_user_without_email_raises_error(self):
         """Test that creating a user without email raises ValueError."""
         with self.assertRaises(ValueError):
-            get_user_model().objects.create_user('', 'test123')
+            get_user_model().objects.create_user("", "test123")
 
     def test_create_superuser(self):
         """Test creating a superuser."""
         user = get_user_model().objects.create_superuser(
-            'admin@example.com',
-            'test123',
+            "admin@example.com",
+            "test123",
         )
 
         self.assertTrue(user.is_superuser)
@@ -46,12 +46,12 @@ class UserModelTests(TestCase):
     def test_user_profile_fields(self):
         """Test user has profile fields."""
         user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='test123',
-            bio='Test bio',
+            email="test@example.com",
+            password="test123",
+            bio="Test bio",
         )
 
-        self.assertEqual(user.bio, 'Test bio')
+        self.assertEqual(user.bio, "Test bio")
 
 
 class UserPrivacyTests(TestCase):
@@ -60,15 +60,15 @@ class UserPrivacyTests(TestCase):
     def test_user_is_private_default_false(self):
         """Test is_private defaults to False."""
         user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
         self.assertFalse(user.is_private)
 
     def test_user_is_verified_default_false(self):
         """Test is_verified defaults to False."""
         user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
         self.assertFalse(user.is_verified)

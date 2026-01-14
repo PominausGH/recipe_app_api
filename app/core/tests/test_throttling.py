@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 
-RECIPES_URL = reverse('recipe:recipe-list')
+RECIPES_URL = reverse("recipe:recipe-list")
 
 
 class ThrottlingConfigTests(TestCase):
@@ -17,29 +17,29 @@ class ThrottlingConfigTests(TestCase):
         rf_settings = settings.REST_FRAMEWORK
 
         # Check throttle classes are configured
-        self.assertIn('DEFAULT_THROTTLE_CLASSES', rf_settings)
+        self.assertIn("DEFAULT_THROTTLE_CLASSES", rf_settings)
         self.assertIn(
-            'rest_framework.throttling.AnonRateThrottle',
-            rf_settings['DEFAULT_THROTTLE_CLASSES']
+            "rest_framework.throttling.AnonRateThrottle",
+            rf_settings["DEFAULT_THROTTLE_CLASSES"],
         )
         self.assertIn(
-            'rest_framework.throttling.UserRateThrottle',
-            rf_settings['DEFAULT_THROTTLE_CLASSES']
+            "rest_framework.throttling.UserRateThrottle",
+            rf_settings["DEFAULT_THROTTLE_CLASSES"],
         )
 
         # Check throttle rates are configured
-        self.assertIn('DEFAULT_THROTTLE_RATES', rf_settings)
-        self.assertIn('anon', rf_settings['DEFAULT_THROTTLE_RATES'])
-        self.assertIn('user', rf_settings['DEFAULT_THROTTLE_RATES'])
-        self.assertIn('recipe_create', rf_settings['DEFAULT_THROTTLE_RATES'])
+        self.assertIn("DEFAULT_THROTTLE_RATES", rf_settings)
+        self.assertIn("anon", rf_settings["DEFAULT_THROTTLE_RATES"])
+        self.assertIn("user", rf_settings["DEFAULT_THROTTLE_RATES"])
+        self.assertIn("recipe_create", rf_settings["DEFAULT_THROTTLE_RATES"])
 
     def test_throttle_rates_values(self):
         """Test throttle rates have expected values."""
-        rates = settings.REST_FRAMEWORK['DEFAULT_THROTTLE_RATES']
+        rates = settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]
 
-        self.assertEqual(rates['anon'], '100/hour')
-        self.assertEqual(rates['user'], '1000/hour')
-        self.assertEqual(rates['recipe_create'], '20/day')
+        self.assertEqual(rates["anon"], "100/hour")
+        self.assertEqual(rates["user"], "1000/hour")
+        self.assertEqual(rates["recipe_create"], "20/day")
 
 
 class RecipeCreateThrottleTests(TestCase):
@@ -48,8 +48,8 @@ class RecipeCreateThrottleTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
         self.client.force_authenticate(user=self.user)
 
@@ -63,8 +63,8 @@ class RecipeCreateThrottleTests(TestCase):
     def test_can_create_recipe(self):
         """Test authenticated user can create a recipe."""
         payload = {
-            'title': 'Test Recipe',
-            'instructions': 'Test instructions',
+            "title": "Test Recipe",
+            "instructions": "Test instructions",
         }
 
         res = self.client.post(RECIPES_URL, payload)

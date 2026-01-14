@@ -31,41 +31,40 @@ from interaction.serializers import (
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """ViewSet for recipes."""
+
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     throttle_classes = [RecipeCreateThrottle]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = RecipeFilter
-    search_fields = ['title', 'description']
-    ordering_fields = ['created_at', 'prep_time', 'cook_time', 'avg_rating']
-    ordering = ['-created_at']
+    search_fields = ["title", "description"]
+    ordering_fields = ["created_at", "prep_time", "cook_time", "avg_rating"]
+    ordering = ["-created_at"]
 
     def get_queryset(self):
         """Return recipes based on user authentication."""
-        queryset = Recipe.objects.annotate(
-            avg_rating=Avg('ratings__score')
-        )
+        queryset = Recipe.objects.annotate(avg_rating=Avg("ratings__score"))
 
         if self.request.user.is_authenticated:
             return queryset.filter(
-                models.Q(author=self.request.user) |
-                models.Q(is_published=True)
+                models.Q(author=self.request.user) | models.Q(is_published=True)
             ).distinct()
         return queryset.filter(is_published=True)
 
     def get_serializer_class(self):
         """Return appropriate serializer class."""
-        if self.action == 'list':
+        if self.action == "list":
             return RecipeListSerializer
-        if self.action in ['create', 'update', 'partial_update']:
+        if self.action in ["create", "update", "partial_update"]:
             return RecipeCreateSerializer
-        if self.action == 'rate':
+        if self.action == "rate":
             return RatingCreateSerializer
-        if self.action == 'comments':
-            if self.request.method == 'POST':
+        if self.action == "comments":
+            if self.request.method == "POST":
                 return CommentCreateSerializer
             return CommentSerializer
-        if self.action == 'upload_image':
+        if self.action == "upload_image":
             from recipe.serializers_image import RecipeImageSerializer
+
             return RecipeImageSerializer
         return RecipeDetailSerializer
 
@@ -73,9 +72,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Create a new recipe."""
         serializer.save(author=self.request.user)
 
-    @action(
-        detail=True, methods=['post'], permission_classes=[IsAuthenticated]
-    )
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def rate(self, request, pk=None):
         """Rate a recipe or update existing rating."""
         recipe = self.get_object()
@@ -95,9 +92,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             status_code = status.HTTP_200_OK
         return Response(output_serializer.data, status=status_code)
 
-    @action(
-        detail=True, methods=['post'], permission_classes=[IsAuthenticated]
-    )
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
         """Toggle favorite status for a recipe."""
         recipe = self.get_object()
@@ -109,7 +104,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if not created:
             favorite.delete()
             return Response(
-                {'status': 'removed from favorites'},
+                {"status": "removed from favorites"},
                 status=status.HTTP_200_OK,
             )
 
@@ -118,14 +113,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['get', 'post'],
+        methods=["get", "post"],
         permission_classes=[IsAuthenticatedOrReadOnly],
     )
     def comments(self, request, pk=None):
         """List or create comments for a recipe."""
         recipe = self.get_object()
 
-        if request.method == 'GET':
+        if request.method == "GET":
             comments = Comment.objects.filter(recipe=recipe, parent=None)
             serializer = CommentSerializer(comments, many=True)
             return Response(serializer.data)
@@ -133,13 +128,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # POST - requires authentication
         if not request.user.is_authenticated:
             return Response(
-                {'detail': 'Authentication credentials were not provided.'},
+                {"detail": "Authentication credentials were not provided."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
         serializer = self.get_serializer(
             data=request.data,
-            context={'recipe_id': recipe.id},
+            context={"recipe_id": recipe.id},
         )
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, recipe=recipe)
@@ -147,9 +142,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
+        methods=["post"],
         permission_classes=[IsAuthenticated, IsOwnerOrReadOnly],
-        url_path='upload-image',
+        url_path="upload-image",
     )
     def upload_image(self, request, pk=None):
         """Upload an image to a recipe."""
@@ -158,14 +153,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             # Process the image before saving
-            image = request.FILES.get('image')
+            image = request.FILES.get("image")
             if image:
                 from core.utils import validate_image, process_image
 
                 is_valid, error = validate_image(image)
                 if not is_valid:
                     return Response(
-                        {'image': [error]},
+                        {"image": [error]},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 

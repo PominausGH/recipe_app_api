@@ -8,20 +8,18 @@ class CategoryModelTests(TestCase):
     def test_create_category(self):
         """Test creating a category is successful."""
         category = Category.objects.create(
-            name='Breakfast',
-            slug='breakfast',
+            name="Breakfast",
+            slug="breakfast",
         )
 
-        self.assertEqual(str(category), 'Breakfast')
+        self.assertEqual(str(category), "Breakfast")
 
     def test_category_hierarchy(self):
         """Test category parent-child relationship."""
-        parent = Category.objects.create(
-            name='Main Dishes', slug='main-dishes'
-        )
+        parent = Category.objects.create(name="Main Dishes", slug="main-dishes")
         child = Category.objects.create(
-            name='Pasta',
-            slug='pasta',
+            name="Pasta",
+            slug="pasta",
             parent=parent,
         )
 
@@ -34,8 +32,8 @@ class TagModelTests(TestCase):
     def test_create_tag(self):
         """Test creating a tag is successful."""
         tag = Tag.objects.create(
-            name='Vegetarian',
-            slug='vegetarian',
+            name="Vegetarian",
+            slug="vegetarian",
         )
 
-        self.assertEqual(str(tag), 'Vegetarian')
+        self.assertEqual(str(tag), "Vegetarian")

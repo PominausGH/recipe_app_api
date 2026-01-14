@@ -4,9 +4,18 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from recipe.models import Recipe
 from interaction.models import (
-    Rating, Favorite, Comment, Follow, FollowRequest,
-    Block, Mute, Notification, NotificationPreference, FeedPreference,
-    Badge, UserBadge
+    Rating,
+    Favorite,
+    Comment,
+    Follow,
+    FollowRequest,
+    Block,
+    Mute,
+    Notification,
+    NotificationPreference,
+    FeedPreference,
+    Badge,
+    UserBadge,
 )
 
 
@@ -15,13 +24,13 @@ class RatingModelTests(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
         self.recipe = Recipe.objects.create(
             author=self.user,
-            title='Test Recipe',
-            instructions='Test instructions',
+            title="Test Recipe",
+            instructions="Test instructions",
             is_published=True,
         )
 
@@ -31,11 +40,11 @@ class RatingModelTests(TestCase):
             user=self.user,
             recipe=self.recipe,
             score=5,
-            review='Great recipe!',
+            review="Great recipe!",
         )
 
         self.assertEqual(rating.score, 5)
-        self.assertEqual(rating.review, 'Great recipe!')
+        self.assertEqual(rating.review, "Great recipe!")
         self.assertEqual(rating.user, self.user)
         self.assertEqual(rating.recipe, self.recipe)
 
@@ -71,7 +80,7 @@ class RatingModelTests(TestCase):
             recipe=self.recipe,
             score=4,
         )
-        expected = f'{self.user.email} rated {self.recipe.title}: 4'
+        expected = f"{self.user.email} rated {self.recipe.title}: 4"
         self.assertEqual(str(rating), expected)
 
 
@@ -80,13 +89,13 @@ class FavoriteModelTests(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
         self.recipe = Recipe.objects.create(
             author=self.user,
-            title='Test Recipe',
-            instructions='Test instructions',
+            title="Test Recipe",
+            instructions="Test instructions",
             is_published=True,
         )
 
@@ -120,7 +129,7 @@ class FavoriteModelTests(TestCase):
             user=self.user,
             recipe=self.recipe,
         )
-        expected = f'{self.user.email} favorited {self.recipe.title}'
+        expected = f"{self.user.email} favorited {self.recipe.title}"
         self.assertEqual(str(favorite), expected)
 
 
@@ -129,13 +138,13 @@ class CommentModelTests(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
         self.recipe = Recipe.objects.create(
             author=self.user,
-            title='Test Recipe',
-            instructions='Test instructions',
+            title="Test Recipe",
+            instructions="Test instructions",
             is_published=True,
         )
 
@@ -144,10 +153,10 @@ class CommentModelTests(TestCase):
         comment = Comment.objects.create(
             user=self.user,
             recipe=self.recipe,
-            text='This is a great recipe!',
+            text="This is a great recipe!",
         )
 
-        self.assertEqual(comment.text, 'This is a great recipe!')
+        self.assertEqual(comment.text, "This is a great recipe!")
         self.assertEqual(comment.user, self.user)
         self.assertEqual(comment.recipe, self.recipe)
         self.assertIsNone(comment.parent)
@@ -157,12 +166,12 @@ class CommentModelTests(TestCase):
         parent_comment = Comment.objects.create(
             user=self.user,
             recipe=self.recipe,
-            text='Original comment',
+            text="Original comment",
         )
         reply = Comment.objects.create(
             user=self.user,
             recipe=self.recipe,
-            text='This is a reply',
+            text="This is a reply",
             parent=parent_comment,
         )
 
@@ -174,7 +183,7 @@ class CommentModelTests(TestCase):
         Comment.objects.create(
             user=self.user,
             recipe=self.recipe,
-            text='Test comment',
+            text="Test comment",
         )
 
         self.recipe.delete()
@@ -185,9 +194,9 @@ class CommentModelTests(TestCase):
         comment = Comment.objects.create(
             user=self.user,
             recipe=self.recipe,
-            text='Test comment',
+            text="Test comment",
         )
-        expected = f'{self.user.email} on {self.recipe.title}'
+        expected = f"{self.user.email} on {self.recipe.title}"
         self.assertEqual(str(comment), expected)
 
 
@@ -196,12 +205,12 @@ class FollowModelTests(TestCase):
 
     def setUp(self):
         self.user1 = get_user_model().objects.create_user(
-            email='user1@example.com',
-            password='testpass123',
+            email="user1@example.com",
+            password="testpass123",
         )
         self.user2 = get_user_model().objects.create_user(
-            email='user2@example.com',
-            password='testpass123',
+            email="user2@example.com",
+            password="testpass123",
         )
 
     def test_create_follow(self):
@@ -232,7 +241,7 @@ class FollowModelTests(TestCase):
             follower=self.user1,
             following=self.user2,
         )
-        expected = f'{self.user1.email} follows {self.user2.email}'
+        expected = f"{self.user1.email} follows {self.user2.email}"
         self.assertEqual(str(follow), expected)
 
 
@@ -241,12 +250,12 @@ class FollowRequestModelTests(TestCase):
 
     def setUp(self):
         self.user1 = get_user_model().objects.create_user(
-            email='user1@example.com',
-            password='testpass123',
+            email="user1@example.com",
+            password="testpass123",
         )
         self.user2 = get_user_model().objects.create_user(
-            email='user2@example.com',
-            password='testpass123',
+            email="user2@example.com",
+            password="testpass123",
             is_private=True,
         )
 
@@ -258,17 +267,13 @@ class FollowRequestModelTests(TestCase):
         )
         self.assertEqual(request.requester, self.user1)
         self.assertEqual(request.target, self.user2)
-        self.assertEqual(request.status, 'pending')
+        self.assertEqual(request.status, "pending")
 
     def test_follow_request_unique_constraint(self):
         """Test only one pending request per user pair."""
-        FollowRequest.objects.create(
-            requester=self.user1, target=self.user2
-        )
+        FollowRequest.objects.create(requester=self.user1, target=self.user2)
         with self.assertRaises(IntegrityError):
-            FollowRequest.objects.create(
-                requester=self.user1, target=self.user2
-            )
+            FollowRequest.objects.create(requester=self.user1, target=self.user2)
 
     def test_follow_request_str(self):
         """Test follow request string representation."""
@@ -276,7 +281,7 @@ class FollowRequestModelTests(TestCase):
             requester=self.user1,
             target=self.user2,
         )
-        expected = f'{self.user1.email} requested {self.user2.email}'
+        expected = f"{self.user1.email} requested {self.user2.email}"
         self.assertEqual(str(request), expected)
 
 
@@ -285,12 +290,12 @@ class BlockModelTests(TestCase):
 
     def setUp(self):
         self.user1 = get_user_model().objects.create_user(
-            email='user1@example.com',
-            password='testpass123',
+            email="user1@example.com",
+            password="testpass123",
         )
         self.user2 = get_user_model().objects.create_user(
-            email='user2@example.com',
-            password='testpass123',
+            email="user2@example.com",
+            password="testpass123",
         )
 
     def test_create_block(self):
@@ -320,7 +325,7 @@ class BlockModelTests(TestCase):
             user=self.user1,
             blocked_user=self.user2,
         )
-        expected = f'{self.user1.email} blocked {self.user2.email}'
+        expected = f"{self.user1.email} blocked {self.user2.email}"
         self.assertEqual(str(block), expected)
 
 
@@ -329,12 +334,12 @@ class MuteModelTests(TestCase):
 
     def setUp(self):
         self.user1 = get_user_model().objects.create_user(
-            email='user1@example.com',
-            password='testpass123',
+            email="user1@example.com",
+            password="testpass123",
         )
         self.user2 = get_user_model().objects.create_user(
-            email='user2@example.com',
-            password='testpass123',
+            email="user2@example.com",
+            password="testpass123",
         )
 
     def test_create_mute(self):
@@ -358,7 +363,7 @@ class MuteModelTests(TestCase):
             user=self.user1,
             muted_user=self.user2,
         )
-        expected = f'{self.user1.email} muted {self.user2.email}'
+        expected = f"{self.user1.email} muted {self.user2.email}"
         self.assertEqual(str(mute), expected)
 
 
@@ -367,12 +372,12 @@ class NotificationModelTests(TestCase):
 
     def setUp(self):
         self.user1 = get_user_model().objects.create_user(
-            email='user1@example.com',
-            password='testpass123',
+            email="user1@example.com",
+            password="testpass123",
         )
         self.user2 = get_user_model().objects.create_user(
-            email='user2@example.com',
-            password='testpass123',
+            email="user2@example.com",
+            password="testpass123",
         )
 
     def test_create_notification(self):
@@ -380,29 +385,29 @@ class NotificationModelTests(TestCase):
         notification = Notification.objects.create(
             recipient=self.user1,
             actor=self.user2,
-            verb='followed',
+            verb="followed",
         )
         self.assertEqual(notification.recipient, self.user1)
         self.assertEqual(notification.actor, self.user2)
-        self.assertEqual(notification.verb, 'followed')
+        self.assertEqual(notification.verb, "followed")
         self.assertFalse(notification.is_read)
 
     def test_notification_with_target(self):
         """Test notification with target object."""
         recipe = Recipe.objects.create(
             author=self.user1,
-            title='Test Recipe',
-            instructions='Test',
+            title="Test Recipe",
+            instructions="Test",
             is_published=True,
         )
         notification = Notification.objects.create(
             recipient=self.user1,
             actor=self.user2,
-            verb='rated',
-            target_type='recipe',
+            verb="rated",
+            target_type="recipe",
             target_id=recipe.id,
         )
-        self.assertEqual(notification.target_type, 'recipe')
+        self.assertEqual(notification.target_type, "recipe")
         self.assertEqual(notification.target_id, recipe.id)
 
     def test_notification_str(self):
@@ -410,19 +415,19 @@ class NotificationModelTests(TestCase):
         notification = Notification.objects.create(
             recipient=self.user1,
             actor=self.user2,
-            verb='followed',
+            verb="followed",
         )
-        expected = f'{self.user2.email} followed {self.user1.email}'
+        expected = f"{self.user2.email} followed {self.user1.email}"
         self.assertEqual(str(notification), expected)
 
     def test_notification_without_actor(self):
         """Test notification created without actor (system notification)."""
         notification = Notification.objects.create(
             recipient=self.user1,
-            verb='badge_awarded',
+            verb="badge_awarded",
         )
         self.assertIsNone(notification.actor)
-        expected = f'System badge_awarded {self.user1.email}'
+        expected = f"System badge_awarded {self.user1.email}"
         self.assertEqual(str(notification), expected)
 
 
@@ -431,8 +436,8 @@ class NotificationPreferenceModelTests(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
 
     def test_create_notification_preference(self):
@@ -440,7 +445,7 @@ class NotificationPreferenceModelTests(TestCase):
         prefs = NotificationPreference.objects.create(user=self.user)
         self.assertTrue(prefs.notify_new_follower)
         self.assertTrue(prefs.notify_recipe_comment)
-        self.assertEqual(prefs.email_digest, 'none')
+        self.assertEqual(prefs.email_digest, "none")
 
     def test_preference_one_to_one(self):
         """Test only one preference per user."""
@@ -451,7 +456,7 @@ class NotificationPreferenceModelTests(TestCase):
     def test_notification_preference_str(self):
         """Test notification preference string representation."""
         prefs = NotificationPreference.objects.create(user=self.user)
-        expected = f'Notification preferences for {self.user.email}'
+        expected = f"Notification preferences for {self.user.email}"
         self.assertEqual(str(prefs), expected)
 
 
@@ -460,8 +465,8 @@ class FeedPreferenceModelTests(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
 
     def test_create_feed_preference(self):
@@ -470,7 +475,7 @@ class FeedPreferenceModelTests(TestCase):
         self.assertTrue(prefs.show_recipes)
         self.assertTrue(prefs.show_ratings)
         self.assertFalse(prefs.show_comments)
-        self.assertEqual(prefs.feed_order, 'chronological')
+        self.assertEqual(prefs.feed_order, "chronological")
 
     def test_preference_one_to_one(self):
         """Test only one preference per user."""
@@ -481,7 +486,7 @@ class FeedPreferenceModelTests(TestCase):
     def test_feed_preference_str(self):
         """Test feed preference string representation."""
         prefs = FeedPreference.objects.create(user=self.user)
-        expected = f'Feed preferences for {self.user.email}'
+        expected = f"Feed preferences for {self.user.email}"
         self.assertEqual(str(prefs), expected)
 
 
@@ -491,55 +496,55 @@ class BadgeModelTests(TestCase):
     def test_create_badge(self):
         """Test creating a badge."""
         badge = Badge.objects.create(
-            name='Rising Chef',
-            slug='rising-chef',
-            description='Published 10 recipes',
-            icon='chef-hat',
-            badge_type='achievement',
-            criteria={'type': 'recipe_count', 'threshold': 10},
+            name="Rising Chef",
+            slug="rising-chef",
+            description="Published 10 recipes",
+            icon="chef-hat",
+            badge_type="achievement",
+            criteria={"type": "recipe_count", "threshold": 10},
         )
-        self.assertEqual(badge.name, 'Rising Chef')
-        self.assertEqual(badge.badge_type, 'achievement')
+        self.assertEqual(badge.name, "Rising Chef")
+        self.assertEqual(badge.badge_type, "achievement")
 
     def test_create_verified_badge(self):
         """Test creating a verified badge (no criteria)."""
         badge = Badge.objects.create(
-            name='Verified',
-            slug='verified',
-            description='Verified account',
-            icon='checkmark',
-            badge_type='verified',
+            name="Verified",
+            slug="verified",
+            description="Verified account",
+            icon="checkmark",
+            badge_type="verified",
         )
-        self.assertEqual(badge.badge_type, 'verified')
+        self.assertEqual(badge.badge_type, "verified")
         self.assertIsNone(badge.criteria)
 
     def test_badge_str(self):
         """Test badge string representation."""
         badge = Badge.objects.create(
-            name='Rising Chef',
-            slug='rising-chef',
-            description='Published 10 recipes',
-            icon='chef-hat',
-            badge_type='achievement',
+            name="Rising Chef",
+            slug="rising-chef",
+            description="Published 10 recipes",
+            icon="chef-hat",
+            badge_type="achievement",
         )
-        self.assertEqual(str(badge), 'Rising Chef')
+        self.assertEqual(str(badge), "Rising Chef")
 
     def test_badge_slug_unique(self):
         """Test badge slug must be unique."""
         Badge.objects.create(
-            name='Rising Chef',
-            slug='rising-chef',
-            description='Published 10 recipes',
-            icon='chef-hat',
-            badge_type='achievement',
+            name="Rising Chef",
+            slug="rising-chef",
+            description="Published 10 recipes",
+            icon="chef-hat",
+            badge_type="achievement",
         )
         with self.assertRaises(IntegrityError):
             Badge.objects.create(
-                name='Another Badge',
-                slug='rising-chef',
-                description='Different badge same slug',
-                icon='star',
-                badge_type='achievement',
+                name="Another Badge",
+                slug="rising-chef",
+                description="Different badge same slug",
+                icon="star",
+                badge_type="achievement",
             )
 
 
@@ -548,15 +553,15 @@ class UserBadgeModelTests(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='testpass123',
+            email="test@example.com",
+            password="testpass123",
         )
         self.badge = Badge.objects.create(
-            name='Rising Chef',
-            slug='rising-chef',
-            description='Published 10 recipes',
-            icon='chef-hat',
-            badge_type='achievement',
+            name="Rising Chef",
+            slug="rising-chef",
+            description="Published 10 recipes",
+            icon="chef-hat",
+            badge_type="achievement",
         )
 
     def test_create_user_badge(self):
@@ -581,5 +586,5 @@ class UserBadgeModelTests(TestCase):
             user=self.user,
             badge=self.badge,
         )
-        expected = f'{self.user.email} earned {self.badge.name}'
+        expected = f"{self.user.email} earned {self.badge.name}"
         self.assertEqual(str(user_badge), expected)

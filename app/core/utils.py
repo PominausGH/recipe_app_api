@@ -8,14 +8,14 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 def generate_file_path(instance, filename):
     """Generate unique file path for uploaded images."""
     ext = os.path.splitext(filename)[1].lower()
-    filename = f'{uuid.uuid4()}{ext}'
+    filename = f"{uuid.uuid4()}{ext}"
 
     # Determine folder based on model type
-    if hasattr(instance, 'recipe'):
-        return os.path.join('recipes', filename)
-    elif hasattr(instance, 'email'):
-        return os.path.join('profiles', filename)
-    return os.path.join('uploads', filename)
+    if hasattr(instance, "recipe"):
+        return os.path.join("recipes", filename)
+    elif hasattr(instance, "email"):
+        return os.path.join("profiles", filename)
+    return os.path.join("uploads", filename)
 
 
 def process_image(image_file, max_width=1200, quality=85):
@@ -29,8 +29,8 @@ def process_image(image_file, max_width=1200, quality=85):
     img = Image.open(image_file)
 
     # Convert to RGB if necessary (handles PNG with transparency, etc.)
-    if img.mode in ('RGBA', 'P'):
-        img = img.convert('RGB')
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
 
     # Strip EXIF by creating new image without metadata
     data = list(img.getdata())
@@ -46,15 +46,15 @@ def process_image(image_file, max_width=1200, quality=85):
 
     # Save to BytesIO
     output = BytesIO()
-    img.save(output, format='JPEG', quality=quality, optimize=True)
+    img.save(output, format="JPEG", quality=quality, optimize=True)
     output.seek(0)
 
     # Create new InMemoryUploadedFile
     return InMemoryUploadedFile(
         output,
-        'ImageField',
-        f'{os.path.splitext(image_file.name)[0]}.jpg',
-        'image/jpeg',
+        "ImageField",
+        f"{os.path.splitext(image_file.name)[0]}.jpg",
+        "image/jpeg",
         output.getbuffer().nbytes,
         None,
     )
@@ -67,8 +67,8 @@ def create_thumbnail(image_file, size=300):
     img = Image.open(image_file)
 
     # Convert to RGB if necessary
-    if img.mode in ('RGBA', 'P'):
-        img = img.convert('RGB')
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
 
     # Create square crop from center
     width, height = img.size
@@ -83,14 +83,14 @@ def create_thumbnail(image_file, size=300):
 
     # Save to BytesIO
     output = BytesIO()
-    img.save(output, format='JPEG', quality=85, optimize=True)
+    img.save(output, format="JPEG", quality=85, optimize=True)
     output.seek(0)
 
     return InMemoryUploadedFile(
         output,
-        'ImageField',
-        f'{os.path.splitext(image_file.name)[0]}_thumb.jpg',
-        'image/jpeg',
+        "ImageField",
+        f"{os.path.splitext(image_file.name)[0]}_thumb.jpg",
+        "image/jpeg",
         output.getbuffer().nbytes,
         None,
     )
@@ -106,17 +106,17 @@ def validate_image(image_file):
     # Check file size (5MB = 5 * 1024 * 1024 bytes)
     max_size = 5 * 1024 * 1024
     if image_file.size > max_size:
-        return False, 'Image file size must be less than 5MB.'
+        return False, "Image file size must be less than 5MB."
 
     # Check format
-    allowed_formats = ['jpeg', 'jpg', 'png', 'webp']
+    allowed_formats = ["jpeg", "jpg", "png", "webp"]
     try:
         img = Image.open(image_file)
         if img.format.lower() not in allowed_formats:
-            formats = ', '.join(allowed_formats)
-            return False, f'Image format must be one of: {formats}.'
+            formats = ", ".join(allowed_formats)
+            return False, f"Image format must be one of: {formats}."
         image_file.seek(0)  # Reset file pointer
     except Exception:
-        return False, 'Invalid image file.'
+        return False, "Invalid image file."
 
     return True, None
