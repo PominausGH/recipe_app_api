@@ -10,6 +10,7 @@ from interaction.serializers import (
     FollowSerializer,
     MuteSerializer,
     NotificationSerializer,
+    UserProfileSerializer,
     UserSummarySerializer,
 )
 from interaction.services.feed import FeedService
@@ -34,6 +35,43 @@ class UserViewSet(viewsets.GenericViewSet):
 
     def get_queryset(self):
         return get_user_model().objects.all()
+
+    def retrieve(self, request, pk=None):
+        """Get user profile with social stats."""
+        user = get_object_or_404(get_user_model(), pk=pk)
+
+        # Calculate follower/following counts
+        followers_count = Follow.objects.filter(following=user).count()
+        following_count = Follow.objects.filter(follower=user).count()
+
+        # Check relationship with current user
+        is_following = False
+        has_pending_request = False
+        if request.user.is_authenticated and request.user != user:
+            is_following = Follow.objects.filter(
+                follower=request.user, following=user
+            ).exists()
+            has_pending_request = FollowRequest.objects.filter(
+                requester=request.user, target=user, status="pending"
+            ).exists()
+
+        # Build profile data
+        profile_data = {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "bio": getattr(user, "bio", None),
+            "profile_photo": user.profile_photo if user.profile_photo else None,
+            "is_verified": getattr(user, "is_verified", False),
+            "is_private": getattr(user, "is_private", False),
+            "followers_count": followers_count,
+            "following_count": following_count,
+            "is_following": is_following,
+            "has_pending_request": has_pending_request,
+        }
+
+        serializer = UserProfileSerializer(profile_data)
+        return Response(serializer.data)
 
     @action(
         detail=True,

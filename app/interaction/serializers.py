@@ -102,6 +102,22 @@ class UserSummarySerializer(serializers.Serializer):
     is_verified = serializers.BooleanField(read_only=True)
 
 
+class UserProfileSerializer(serializers.Serializer):
+    """Detailed user serializer for profile pages."""
+
+    id = serializers.IntegerField(read_only=True)
+    email = serializers.EmailField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    bio = serializers.CharField(read_only=True, allow_null=True)
+    profile_photo = serializers.ImageField(read_only=True)
+    is_verified = serializers.BooleanField(read_only=True)
+    is_private = serializers.BooleanField(read_only=True)
+    followers_count = serializers.IntegerField(read_only=True)
+    following_count = serializers.IntegerField(read_only=True)
+    is_following = serializers.BooleanField(read_only=True)
+    has_pending_request = serializers.BooleanField(read_only=True)
+
+
 class FollowSerializer(serializers.ModelSerializer):
     """Serializer for follow relationships."""
 
