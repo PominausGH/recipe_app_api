@@ -24,7 +24,7 @@ export const authApi = {
     if (refreshToken) {
       try {
         await client.post('/auth/logout/', { refresh: refreshToken });
-      } catch (error) {
+      } catch {
         // Ignore logout errors
       }
     }

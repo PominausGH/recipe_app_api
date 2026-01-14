@@ -4,7 +4,7 @@ import { useAddComment } from '../hooks/useRecipes';
 import { Button, Input } from './ui';
 import { UserLink } from './UserLink';
 
-function Comment({ comment, recipeId, onReply }) {
+function Comment({ comment, recipeId }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replyText, setReplyText] = useState('');
   const { isAuthenticated } = useAuth();

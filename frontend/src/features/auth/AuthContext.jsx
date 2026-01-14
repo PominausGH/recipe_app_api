@@ -1,8 +1,8 @@
-import { createContext, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { authApi } from '../../api/auth';
-import { setAccessToken, clearTokens } from '../../api/client';
+import { AuthContext } from './authContext';
 
-export const AuthContext = createContext(null);
+export { AuthContext };
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -12,18 +12,20 @@ export function AuthProvider({ children }) {
     try {
       const userData = await authApi.getMe();
       setUser(userData);
-    } catch (error) {
+    } catch {
       setUser(null);
     }
   }, []);
 
   useEffect(() => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken) {
-      fetchUser().finally(() => setIsLoading(false));
-    } else {
+    const initAuth = async () => {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        await fetchUser();
+      }
       setIsLoading(false);
-    }
+    };
+    initAuth();
   }, [fetchUser]);
 
   const login = async (email, password) => {

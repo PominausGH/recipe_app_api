@@ -19,7 +19,7 @@ export function ProfilePage() {
     try {
       await updateProfile({ name, bio });
       setIsEditing(false);
-    } catch (err) {
+    } catch {
       setError('Failed to update profile.');
     } finally {
       setIsSubmitting(false);
@@ -31,7 +31,7 @@ export function ProfilePage() {
     try {
       await authApi.updateProfilePhoto(file);
       await refreshUser();
-    } catch (err) {
+    } catch {
       setError('Failed to upload photo.');
     }
   };
