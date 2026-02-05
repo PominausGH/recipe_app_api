@@ -4,7 +4,7 @@ from .base import *  # noqa: F401, F403
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "recipe-api.daintytrading.com", "recipe.daintytrading.com", "recipe_app_api-app-1"]
 
 DATABASES = {
     "default": {
@@ -19,8 +19,14 @@ DATABASES = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"  # noqa: F405
 
-# Allow all origins in development
-CORS_ALLOW_ALL_ORIGINS = True
+# Explicit CORS origins for development
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "https://recipe.daintytrading.com",
+]
 
 # Higher throttle rates for development/testing
 REST_FRAMEWORK.update(  # noqa: F405

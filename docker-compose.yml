@@ -7,7 +7,7 @@ services:
       args:
         - DEV=true
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"
     volumes:
       - ./app:/app
     command: >
@@ -19,6 +19,7 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=password
+      - SECRET_KEY=dev-secret-key-change-in-production
     depends_on:
       - db
 
