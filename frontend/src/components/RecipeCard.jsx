@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { ClockIcon, StarIcon } from "@heroicons/react/24/solid";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { Card } from "./ui";
 import { UserLink } from "./UserLink";
+import { useAuth } from "../hooks/useAuth";
+import { useDeleteRecipe } from "../hooks/useRecipes";
 
 const difficultyColors = {
   easy: "bg-green-100 text-green-800",
@@ -10,7 +13,18 @@ const difficultyColors = {
 };
 
 export function RecipeCard({ recipe }) {
+  const { user } = useAuth();
+  const deleteRecipe = useDeleteRecipe();
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+  const isOwner = user?.id === recipe.author?.id;
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this recipe?")) {
+      await deleteRecipe.mutateAsync(recipe.id);
+    }
+  };
 
   return (
     <Link to={`/recipes/${recipe.id}`}>
@@ -35,6 +49,15 @@ export function RecipeCard({ recipe }) {
             >
               {recipe.difficulty}
             </span>
+          )}
+          {isOwner && (
+            <button
+              onClick={handleDelete}
+              className="absolute top-2 left-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-md transition-colors"
+              title="Delete recipe"
+            >
+              <TrashIcon className="h-4 w-4" />
+            </button>
           )}
         </div>
         <Card.Body>

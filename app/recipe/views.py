@@ -13,7 +13,7 @@ from interaction.serializers import (
     RatingSerializer,
 )
 from recipe.filters import RecipeFilter
-from recipe.models import Recipe
+from recipe.models import Ingredient, Recipe
 from recipe.permissions import IsOwnerOrReadOnly
 from recipe.serializers import (
     RecipeCreateSerializer,
@@ -234,6 +234,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 is_published=False,  # Draft by default
             )
 
+            # Extract and create ingredients
+            try:
+                ingredients_list = scraper.ingredients()
+                for idx, ingredient_text in enumerate(ingredients_list):
+                    if ingredient_text and ingredient_text.strip():
+                        # Clean up the text: normalize whitespace, strip HTML
+                        clean_text = " ".join(ingredient_text.split())
+                        Ingredient.objects.create(
+                            recipe=recipe,
+                            name=clean_text,
+                            quantity=0,  # 0 indicates raw imported text
+                            unit="pieces",
+                            order=idx,
+                        )
+            except Exception:
+                # If ingredient extraction fails, continue without them
+                pass
+
             # Return the created recipe
             serializer = RecipeDetailSerializer(recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -242,6 +260,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             error_msg = str(e)
             if "not implemented" in error_msg.lower():
                 error_msg = "This website is not supported for recipe import."
+            else:
+                # Sanitize error message to avoid exposing internal details
+                error_msg = "Failed to import recipe from URL. Please check the URL and try again."
             return Response(
                 {"error": error_msg},
                 status=status.HTTP_400_BAD_REQUEST,

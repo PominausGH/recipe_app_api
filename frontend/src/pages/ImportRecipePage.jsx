@@ -1,25 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useImportRecipe } from "../hooks/useRecipes";
 import { Button, Input } from "../components/ui";
+
+const isValidUrl = (string) => {
+  try {
+    const url = new URL(string);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 
 export function ImportRecipePage() {
   const navigate = useNavigate();
   const importRecipe = useImportRecipe();
   const [url, setUrl] = useState("");
   const [error, setError] = useState(null);
+  const hasAutoImported = useRef(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!url.trim()) {
-      setError("Please enter a URL");
+  // Auto-import when a valid URL is pasted
+  useEffect(() => {
+    if (!url.trim() || hasAutoImported.current || importRecipe.isPending) {
       return;
     }
 
+    if (isValidUrl(url)) {
+      hasAutoImported.current = true;
+      handleImport(url);
+    }
+  }, [url]);
+
+  const handleImport = async (importUrl) => {
+    setError(null);
+
     try {
-      const recipe = await importRecipe.mutateAsync(url);
+      const recipe = await importRecipe.mutateAsync(importUrl);
       navigate(`/recipes/${recipe.id}/edit`);
     } catch (err) {
       const message =
@@ -27,7 +43,20 @@ export function ImportRecipePage() {
         err.response?.data?.url?.[0] ||
         "Failed to import recipe. Please try again.";
       setError(message);
+      hasAutoImported.current = false; // Allow retry
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!url.trim()) {
+      setError("Please enter a URL");
+      return;
+    }
+
+    hasAutoImported.current = true;
+    handleImport(url);
   };
 
   return (

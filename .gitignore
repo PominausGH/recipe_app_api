@@ -19,7 +19,8 @@ venv/
 env/
 
 # environment files
-.env
+.env*
+!.env.example
 
 # frontend
 frontend/.env

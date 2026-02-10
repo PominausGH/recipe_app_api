@@ -4,10 +4,25 @@ services:
       context: ./frontend
     restart: always
     ports:
-      - "5173:80"
+    - 127.0.0.1:5173:80
     networks:
-      - recipe_app_api_default
-
+    - recipe_app_api_default
+    cap_drop:
+    - ALL
+    security_opt:
+    - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          pids: 200
+    cap_add:
+    - CHOWN
+    - DAC_OVERRIDE
+    - FOWNER
+    - SETGID
+    - SETUID
+    - NET_BIND_SERVICE
 networks:
   recipe_app_api_default:
     external: true

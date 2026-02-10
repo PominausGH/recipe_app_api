@@ -176,7 +176,14 @@ export function RecipeDetailPage() {
       {recipe.description && (
         <Card className="mb-6">
           <Card.Body>
-            <p className="text-gray-700">{recipe.description}</p>
+            {recipe.description.includes("<") ? (
+              <div
+                className="text-gray-700 prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: recipe.description }}
+              />
+            ) : (
+              <p className="text-gray-700">{recipe.description}</p>
+            )}
           </Card.Body>
         </Card>
       )}
@@ -197,9 +204,16 @@ export function RecipeDetailPage() {
           <h2 className="text-xl font-semibold">Instructions</h2>
         </Card.Header>
         <Card.Body>
-          <div className="prose max-w-none whitespace-pre-wrap">
-            {recipe.instructions}
-          </div>
+          {recipe.instructions?.includes("<") ? (
+            <div
+              className="prose max-w-none"
+              dangerouslySetInnerHTML={{ __html: recipe.instructions }}
+            />
+          ) : (
+            <div className="prose max-w-none whitespace-pre-wrap">
+              {recipe.instructions}
+            </div>
+          )}
         </Card.Body>
       </Card>
 
