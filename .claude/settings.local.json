@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(superpowers:systematic-debugging)",
+      "Bash(docker-compose ps:*)",
+      "Bash(docker compose ps:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(docker compose:*)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker logs:*)"
+    ]
+  }
+}
