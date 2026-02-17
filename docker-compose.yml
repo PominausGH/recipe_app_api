@@ -38,7 +38,7 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     volumes:
-    - dev-db-data:/var/lib/postgresql/data
+    - dev-db-data-pg16:/var/lib/postgresql/data
     environment:
     - POSTGRES_DB=devdb
     - POSTGRES_USER=devuser
@@ -59,4 +59,4 @@ services:
     - SETGID
     - SETUID
 volumes:
-  dev-db-data: null
+  dev-db-data-pg16: null
