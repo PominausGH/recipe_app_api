@@ -10,15 +10,12 @@ services:
     - ./app:/app
     command: "sh -c \"python manage.py wait_for_db &&\n      python manage.py migrate &&\n      python manage.py runserver\
       \ 0.0.0.0:8000\"\n"
-    environment:
-    - DB_HOST=db
-    - DB_NAME=devdb
-    - DB_USER=devuser
-    - DB_PASS=password
-    - SECRET_KEY=dev-secret-key-change-in-production
+    env_file:
+    - .env
     restart: unless-stopped
-    depends_on:
-    - db
+    networks:
+    - default
+    - postgres-main-network
     cap_drop:
     - ALL
     cap_add:
@@ -34,29 +31,7 @@ services:
         limits:
           memory: 512M
           pids: 200
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    volumes:
-    - dev-db-data-pg16:/var/lib/postgresql/data
-    environment:
-    - POSTGRES_DB=devdb
-    - POSTGRES_USER=devuser
-    - POSTGRES_PASSWORD=password
-    cap_drop:
-    - ALL
-    security_opt:
-    - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          pids: 200
-    cap_add:
-    - CHOWN
-    - DAC_OVERRIDE
-    - FOWNER
-    - SETGID
-    - SETUID
-volumes:
-  dev-db-data-pg16: null
+volumes: {}
+networks:
+  postgres-main-network:
+    external: true
