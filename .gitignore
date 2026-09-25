@@ -31,3 +31,6 @@ frontend/.env
 
 # Node modules
 node_modules/
+
+# Local Claude Code permissions (machine-specific, may embed secrets)
+.claude/settings.local.json
