@@ -1,10 +1,10 @@
-Django>=3.2.4,<3.3
-djangorestframework>=3.12.4,<3.13
-djangorestframework-simplejwt>=5.0.0,<6.0
-django-filter>=21.1,<22.0
-drf-spectacular>=0.26.0,<0.27
-Pillow>=9.0.0,<10.0
-psycopg2>=2.8.6,<=2.9
-django-cors-headers>=4.0.0,<5.0
-gunicorn>=21.0.0,<23.0
-recipe-scrapers>=14.0.0,<15.0
+Django==3.2.25
+djangorestframework==3.12.4
+djangorestframework-simplejwt==5.5.1
+django-filter==21.1
+drf-spectacular==0.26.5
+Pillow==9.5.0
+psycopg2==2.9.13  # was >=2.8.6,<=2.9; pinned to latest 2.9.x
+django-cors-headers==4.9.0
+gunicorn==22.0.0
+recipe-scrapers==14.61.0
